@@ -4,7 +4,7 @@ LLM-Assisted Process Planning for CNC Machining
 # Guide
 1. Clone this repo.
 ```bash
-git clone
+git clone https://github.com/lorenzobauce/llm_cnc.git
 ```
 
 2. Creating a new anaconda environment.
