@@ -13,12 +13,17 @@ conda create -n llm_cnc python=3.10 -y
 conda activate llm_cnc
 bash install.sh
 ```
-You need to activate the environment each time you enter in it. In case you need to deactivate simply type:
+  You need to activate the environment each time you enter in it. In case you need to deactivate simply type:
 ```bash
 conda deactivate
+
+```
+3. Copy the API key in a file called .env
+```bash
+OPENAI_API_KEY='copy your API key here'
 ```
 
-3. Run the main program.
+4. Run the main program.
 ```python
 python main.py
 ```
