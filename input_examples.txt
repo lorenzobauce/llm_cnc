@@ -1,0 +1,16 @@
+Prima di fare ogni cosa attivare l'env con
+conda activate llm_cnc
+
+Se ci sono problemi con lo storage
+rm -rf vectorstore
+
+Per contrallare i Chucks
+python retrieve_context.py
+
+Runnare il main
+clear
+python main.py
+
+Prompt examples:
+Tell me a comlete CAM process for the current part. The part is made of Aluminum. 
+Tell me a comlete CAM process for the current part. The part is made of Aluminum. If you are capable, generate a G-Code example for my 5 axis CNC machine.

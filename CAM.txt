@@ -1,0 +1,146 @@
+## Computer Aided Manufacturing
+
+## Basic Equations
+# Turning
+n                                        -> Spindle speed [rev/min]
+D_m                                      -> Machined diameter [mm]
+f_n                                      -> Feed per revolution [mm/rev]
+a_p                                      -> Depth of cut [mm]
+h_m                                      -> Average chip thickness [mm]
+l_m                                      -> Machined length [mm]
+v_c   = π · D_m · n / 1000               -> Cutting speed [m/min]
+v_f   = f_n · n                          -> Feed velocity [mm/min]
+h_D   = f_n · sin(kr)                    -> Chip thickness [mm]
+MRR   = A_D · v_c = a_p · f_n · v_c      -> Material Removal Rate [mm^3/min]
+k_{cs}= k_{c0,4} · 0.4^x                 -> Specific Cutting Pressure [MPa]
+k_c   = k_{cs} / h_D^{x}                 -> Cutting Pressure [MPa]
+F_c   = k_c · A_D                        -> Cutting Force [N]
+P_c   = F_c · v_c                        -> Cutting Power [W]
+t_c   = l_c / v_f = V / MRR              -> Cutting Time [min]
+t_m   = l_m / v_f                        -> Machining Time [min]
+T_c   = F_c · D_m / 2                    -> Cutting Torque [Nm]
+T_r   = z · μ · p · A · D_r / 2          -> Resistant Torque (3-jaws chuck) [Nm]
+J     = π · D_m^4 / 64                   -> Moment of Inertia [mm^4]
+d     = 1/3   · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 1: Three jaws self-centering chuck
+d     = 1/107 · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 2: Self-centering chuck – Dead center
+d     = 1/48  · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 3: Between centers
+
+# Milling
+a_e                                          -> Working engagement [mm]
+z                                            -> Number of working teeth
+Z                                            -> Total number of teeth
+D                                            -> Cutting diameter at cutting depth a_p [mm]
+φ_0   = 2π / Z                               -> Angle between teeth [rad]
+φ     = z · φ_0                              -> Engaged angle [rad]
+v_f   = z · f_z · n                          -> Feed velocity [mm/min]
+v_c   = π · D · n / 1000                     -> Cutting speed [m/min]
+f_z   = v_f / (n · z)                        -> Feed per tooth [mm/rev·tooth]
+h_{D,θ} = f_z · sin(θ)                       -> Slab milling – Chip Thickness [mm]
+A_{D,θ} = h_{D,θ} · a_p                      -> Slab milling – Chip Area [mm^2]
+h_{D,θ} = f_z · cos(θ) · sin(k_r)            -> Face milling – Chip Thickness [mm]
+A_{D,θ} = f_z · cos(θ) · a_p                 -> Face milling – Chip Area [mm^2]
+F_{c(θ)} = k_{c,θ} · A_{D,θ}                 -> Cutting Force [N]
+T_c   = Σ_{i=1}^z (F_{c(θ_i)} · D / 2)       -> Cutting Torque [Nm]                         
+P_c   = T_c · ω; ω = 2π · n = v_c / (D/2)    -> Cutting Power [W]
+h_{D,av} = f_z · 2a_e / (φ · D)              -> Average Chip Thickness [mm]
+MRR   = a_e · a_p · v_f                      -> Material Removal Rate [mm^3/min]
+t_c   = l_c / v_f = V / MRR                  -> Cutting Time [min]
+t_m   = l_m / v_f                            -> Machining Time [min]
+
+# Drilling (twist drill)
+D_c                                          -> Drill diameter [mm]
+K_r                                          -> Entering angle [rad]
+v_f   = f_n · n                              -> Penetration rate [mm/min]
+A_D   = f_n · D_c / 4                        -> Chip Area [mm^2]
+F_f   = 0.5 · k_c · D_c/2 · f_n · sin(K_r)   -> Feed Force [N]
+F_c   = k_c · A_D                            -> Cutting Force [N]
+T_c   = F_c · D_c / 2                        -> Cutting Torque [Nm]
+P_c   = T_c · ω; ω = 2π · n                  -> Cutting Power [W]
+MRR   = (π · D_c^2 · v_f) / 4                -> Material Removal Rate [mm^3/min]
+t_c   = l_c / v_f = V / MRR                  -> Cutting Time [min]
+t_m   = l_m / v_f                            -> Machining Time [min]
+
+# Trepanning / Reaming / Counterboring
+A_D   = f_z · (D_{ext} - D_{int}) / 2        -> Chip Area [mm^2]
+F_c   = k_c · A_D                            -> Cutting Force [N]
+T_c   = Z · F_c · D_{ext}                    -> Cutting Torque [Nm]
+P_c   = T_c · ω; ω = 2π · n = D / c_2        -> Cutting Power [W]
+MRR   = (π · (D_{ext}^2 - D_{int}^2) · v_f) / 4 -> Material Removal Rate [mm^3/min]
+t_c   = l_c / v_f = V / MRR                  -> Cutting Time [min]
+t_m   = l_m / v_f                            -> Machining Time [min]
+
+# Tool life and Machining Economics
+T                                            -> Tool life [min]
+v_c · T^(n) = C;                             -> Classical Taylor’s Law; n,C are parameters of the tool depending on tool material and sveral parameters
+T_p   = T_h + (V / (A_D · v_c)) · (1 + T_t / T) -> Production Time [min]
+C_p   = C_o · T_h + C_o · (V / (A_D · v_c)) · [1 + (T_t + C_t / C_o) / T] -> Production Cost [€]
+T_{opt} = T_t · (1/n - 1)                    -> Production Time – Optimal Tool Life [min]
+T_{opt} = (T_t + C_t / C_o) · (1/n - 1)      -> Production Cost – Optimal Tool Life [min]
+
+# Roughness
+R_{max} = f · 10^3 / (cotg(kr') + cotg(kr))  -> Maximum roughness for Turning – zero nose radius [μm]
+R_{max} = f^2 · 10^3 / (8 · r)               -> Maximum roughness for Turning – nose radius r [μm]
+R_a     = R_{max} / 4                        -> Arithmetic mean roughness [μm]
+R_a     = π^2 · f^2 / (32 · r)               -> Arithmetic mean roughness [μm]
+R_{max} = 2 · f / (z · (2π · R + 60 · Z · f) · 10^3) -> Slab Milling [μm]
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+## Roughing Strategies (Milling)
+
+- Adaptive / High-Efficiency Roughing  
+  - Use high axial depth (ap ≈ 80–100 % of flute length) and low radial width (ae ≈ 8–15 % D) to maintain constant chip load and lower heat.  
+  - Choose CAM toolpaths such as Adaptive Clearing or Dynamic Mill; feed rate can be 1.2–1.5 × the traditional value.  
+  - Prefer 4- to 6-flute carbide end-mills; helix 35–45 ° for aluminium, ~30 ° for steels.  
+
+- Trochoidal (Slot / Contour) Milling 
+  - Spiral motion keeps radial engagement constant → cooler cut; ideal for hardened steels and super-alloys.  
+  - Allows ~30 % higher cutting speed (Vc) than conventional slotting and often doubles tool life.  
+
+
+## Finishing Strategies
+
+- Finishing pass with ap 0.2–0.5 mm and ae 5–10 % D to minimise cutting forces and vibration.  
+- Spindle speed n from  n = 1000 · Vc / (π·D) with Vc 10–20 % lower than in roughing for better Ra.  
+- Use corner-radius (bull-nose) cutters or inserts with large nose radius to reduce scallop height.
+
+
+## Feature-Machining Guidelines
+
+| Feature | Recommended tool | Notes |
+|---------|------------------|-------|
+| Rectangular pocket | End-mill D ≈ 60 % pocket width | Adaptive roughing → finishing pass |
+| Hole D ≤ 12 mm | Carbide twist drill 2×D–3×D | Peck drilling if L/D > 3 |
+| Hole D > 12 mm | Helical interpolation, then finish bore | Low spindle torque, better chip evacuation |
+| Large face | Face-mill D 50–80 mm | ae ≥ 75 % D, ap ≤ 2 mm |
+
+
+## Cutting-Parameter Cheat-Sheet
+
+- Typical cutting speed v_c
+  - Aluminium 7075: 180–250 (carbide)  
+  - Steel C45: 80–120 (coated carbide)  
+
+- Feed per tooth f_z  
+  - Aluminium: 0.08–0.20 mm/tooth  
+  - Steels: 0.06–0.12 mm/tooth  
+
+
+## Tool-Life Optimisation
+
+1. Reduce Vc by ~10 % if crater wear or edge rounding appears.  
+2. Keep f_z constant where possible; increasing speed instead of chip load reduces heat.  
+3. Avoid “half-slot” cuts; maintain constant radial engagement (adaptive / trochoidal paths).  
+4. Apply the Taylor’s law to estimate optimal tool life:  
+
+
+## Surface-Finish Targets
+
+| Strategy      | Typical Ra (µm) |
+|---------------|-----------------|
+| Roughing      | ≤ 3.2           |
+| Semi-finish   | 1.6             |
+| Finish        | 0.8             |
+
+
+
