@@ -74,7 +74,7 @@ def build_process_prompt(description: str, machine: Dict) -> str:
 
     ### Output requirements
     • Start with a short consideration confirming manufacturability with the provided machine and tools.
-    • If YES: provide step-by-step process plan with sections: Roughing, Semi-finish (if any), Finishing, Drilling, Misc.
+    • If YES: provide step-by-step process plan with sections.
     • For each step include: Tool ID, operation type, spindle speed (n), feedrate (vf), depth/pass (ap), side engagement (ae), coolant on/off, notes.
     • If NO: detail each blocking issue and suggest concrete actions.
     • Write all equations and numbers in plain text using ASCII (e.g. n = 1000 * Vc / (pi * D)).
