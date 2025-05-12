@@ -5,7 +5,7 @@
 n                                        -> Spindle speed [rev/min]
 D_m                                      -> Machined diameter [mm]
 f_n                                      -> Feed per revolution [mm/rev]
-a_p                                      -> Depth of cut [mm]
+a_p                                      -> Axial depth of cut [mm]
 h_m                                      -> Average chip thickness [mm]
 l_m                                      -> Machined length [mm]
 v_c   = π · D_m · n / 1000               -> Cutting speed [m/min]
@@ -26,7 +26,7 @@ d     = 1/107 · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 2: Self-
 d     = 1/48  · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 3: Between centers
 
 # Milling
-a_e                                          -> Working engagement [mm]
+a_e                                          -> Radial depth of cut [mm]
 z                                            -> Number of working teeth
 Z                                            -> Total number of teeth
 D                                            -> Cutting diameter at cutting depth a_p [mm]
@@ -91,16 +91,31 @@ R_{max} = 2 · f / (z · (2π · R + 60 · Z · f) · 10^3) -> Slab Milling [μm
 - Adaptive / High-Efficiency Roughing  
   - Use high axial depth (ap ≈ 80–100 % of flute length) and low radial width (ae ≈ 8–15 % D) to maintain constant chip load and lower heat.  
   - Choose CAM toolpaths such as Adaptive Clearing or Dynamic Mill; feed rate can be 1.2–1.5 × the traditional value.  
-  - Prefer 4- to 6-flute carbide end-mills; helix 35–45 ° for aluminium, ~30 ° for steels.  
-
+  - Optimize toolpaths, using curved and trochoidal-like toolpaths that avoid sharp corners and abrupt direction changes.
+  
 - Trochoidal (Slot / Contour) Milling 
-  - Spiral motion keeps radial engagement constant → cooler cut; ideal for hardened steels and super-alloys.  
+  - Spiral motion composed of circular milling that includes simultaneous forward movements, keeps radial engagement constant → cooler cut; ideal for hardened steels and super-alloys.  
+  - The controlled arc of engagement generates low cutting forces, which enable high axial depths of cut 
+  - Suitable for rough milling of confined cavities, pockets and grooves.
   - Allows ~30 % higher cutting speed (Vc) than conventional slotting and often doubles tool life.  
+  - The maximum radial depth of cut (ae) should not exceed ~20% of the cutter diameter.
+  - Cutting parameters: Cutter diameter max: D_c = 70% slot width
+                        Step over max: w = 10% D_c
+                        Radial cut max: ae = 20% D_c
+                        Axial cut: a_p = up to 2 x D_c
+                        Start feed per tooth: fz = 0.1 mm
+
+- Number of flutes for carbide end-mills
+ - 2-flute: Recommended for non-ferrous materials. They are suitable to accomodate the larger chips produced by high f_z on softer materials.
+ - 3-flute: Recommended for non-ferrous materials. Fewer flutes allow for excellent chip clearance on larger chips, and deeper cut depths. Ideal for aluminum in heavy roughing and finishing applications.
+ - 4-flute: Recommended for ferrous materials. The low flute count allows for excellent chip clearance for general purpose roughing and slotting. Ideal for steel, stainless, and cast iron. 
+ - 5-flute: Recommended for ferrous materials. Higher flute count increases the tool strength, but reduces the cut depths. Ideal for finishing or high-efficiency milling in steel, stainless, cast iron, and harder materials.
+ - 6-flute: Recommended for ferrous materials. High flute count yields a thicker core for greater tool strength and less deflection, while increasing material removal rates. Ideal for high-efficiency/high-speed milling in steel, stainless, cast iron, and high-temp alloys. 
 
 
 ## Finishing Strategies
 
-- Finishing pass with ap 0.2–0.5 mm and ae 5–10 % D to minimise cutting forces and vibration.  
+- Finishing pass with ap 0.2–0.5 mm and ae 5–10 % Dc to minimise cutting forces and vibration.  
 - Spindle speed n from  n = 1000 · Vc / (π·D) with Vc 10–20 % lower than in roughing for better Ra.  
 - Use corner-radius (bull-nose) cutters or inserts with large nose radius to reduce scallop height.
 
@@ -117,9 +132,9 @@ R_{max} = 2 · f / (z · (2π · R + 60 · Z · f) · 10^3) -> Slab Milling [μm
 
 ## Cutting-Parameter Cheat-Sheet
 
-- Typical cutting speed v_c
-  - Aluminium 7075: 180–250 (carbide)  
-  - Steel C45: 80–120 (coated carbide)  
+- Typical cutting speed Vc
+  - Aluminium 7075: 180–250 (carbide mills)  
+  - Steel C45: 80–120 (coated carbide mills)  
 
 - Feed per tooth f_z  
   - Aluminium: 0.08–0.20 mm/tooth  
@@ -141,6 +156,4 @@ R_{max} = 2 · f / (z · (2π · R + 60 · Z · f) · 10^3) -> Slab Milling [μm
 | Roughing      | ≤ 3.2           |
 | Semi-finish   | 1.6             |
 | Finish        | 0.8             |
-
-
 
