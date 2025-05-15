@@ -1,6 +1,8 @@
 ## Computer Aided Manufacturing
+--------------------------------------------------------------------------------------------------------------------------------------
 
 ## Basic Equations
+
 
 --------------------------------------------------
 # Turning
@@ -70,6 +72,7 @@ MRR   = a_e · a_p · v_f                      -> Material Removal Rate [mm^3/mi
 t_c   = l_c / v_f = V / MRR                  -> Cutting time [min]
 t_m   = l_m / v_f                            -> Machining time [min]
 
+
 --------------------------------------------------
 # Drilling (twist drill)
 --------------------------------------------------
@@ -96,6 +99,7 @@ P_c   = T_c · ω; ω = 2π · n = D / c_2        -> Cutting Power [W]
 MRR   = (π · (D_{ext}^2 - D_{int}^2) · v_f) / 4 -> Material Removal Rate [mm^3/min]
 t_c   = l_c / v_f = V / MRR                  -> Cutting Time [min]
 t_m   = l_m / v_f                            -> Machining Time [min]
+
 
 --------------------------------------------------
 # Tool life and Machining Economics
@@ -124,6 +128,7 @@ R_{max} = 2 · f / (z · (2π · R + 60 · Z · f) · 10^3) -> Slab Milling [μm
 ## Cutting Parameters and Strategies Overview
 This guide offers a comprehensive reference for selecting cutting parameters and machining strategies, tailored to specific applications and ISO material classifications.
 
+
 --------------------------------------------------
 # 1. Cutting Speed Vc [m/min]
 --------------------------------------------------
@@ -140,6 +145,7 @@ K (Cast iron)           | Hyb. AlCrN or AlTiN coated carbide    | 100 – 150
 N (Aluminium alloys)    | Uncoated carbide                      | 180 – 250
 S (Superalloys, Ti)     | AlTiN or Hyb. AlCrN coated carbide    | 40 – 90
 H (Hardened steel>50HRC)| Hyb. AlCrN coated carbide             | 50 – 90
+
 
 --------------------------------------------------
 # 2. Feed per Tooth f_z [mm/tooth]
@@ -159,6 +165,7 @@ N (Aluminium) – Finishing      | 0.06 – 0.12
 S (Superalloys, titanium)      | 0.03 – 0.08
 H (Hardened steel)             | 0.03 – 0.07
 
+
 --------------------------------------------------
 # 3. Depths of Cut (relative to tool diameter D)
 --------------------------------------------------
@@ -169,6 +176,7 @@ Finishing    | 0.1 – 0.3 × D       | 0.05 – 0.15 × D
 Roughing     | 0.5 – 1.5 × D       | 0.2 – 0.5 × D
 Slotting     | 0.5 – 1.0 × D       | 1.0 × D (full slot)
 
+
 --------------------------------------------------
 # 4. Finishing Strategies
 --------------------------------------------------
@@ -177,6 +185,7 @@ Slotting     | 0.5 – 1.0 × D       | 1.0 × D (full slot)
   - Radial depth a_e = 5–10% of cutter diameter D
 - Reduce Vc by 10–20% compared to roughing to improve surface finish (Ra).
 - Use corner-radius (bull-nose) end mills or inserts with large nose radii to lower scallop height and tool deflection.
+
 
 --------------------------------------------------
 # 5. Tool-Life Optimisation
@@ -191,6 +200,7 @@ Slotting     | 0.5 – 1.0 × D       | 1.0 × D (full slot)
      - C = constant (material dependent)
      - n = exponent (usually 0.2–0.4 for carbide)
 
+
 --------------------------------------------------
 # 6. Feature-Machining Guidelines
 --------------------------------------------------
@@ -202,12 +212,14 @@ Hole (D ≤ 12 mm)  | Carbide twist drill 2×D–3×D  | Use pecking if L/D > 3
 Hole (D > 12 mm)  | Helical interpolation        | Better chip evacuation and low torque required
 Large face        | Face mill D = 50–80 mm       | Use a_e ≥ 75% D, and a_p ≤ 2 mm
 
+
 --------------------------------------------------
 # 7. Safety Margins and Good Practice
 --------------------------------------------------
 - Always validate cutting parameters with tool supplier data.
 - Reduce both Vc and f_z by 20–30% for dry cutting or poor cooling.
 - Lower parameters by 40% when ramping, plunging, or entering full-width cuts.
+
 
 --------------------------------------------------
 # 8. Surface-Finish Targets
@@ -218,6 +230,7 @@ Large face        | Face mill D = 50–80 mm       | Use a_e ≥ 75% D, and a_p 
 | Roughing      | ≤ 3.2           |
 | Semi-finish   | 1.6             |
 | Finish        | 0.8             |
+
 
 --------------------------------------------------
 # 9. Typical values to compute the cutting pressure depending on the target material 
@@ -244,6 +257,7 @@ S (superalloys, titanium) -> 0.35 – 0.45
 H (hardened steel)        -> 0.25 – 0.30
 Default for carbon steels -> x ≈ 0.2
 
+
 --------------------------------------------------
 # 10. Number of flutes for carbide end-mills
 --------------------------------------------------
@@ -252,6 +266,7 @@ Default for carbon steels -> x ≈ 0.2
  - 4-flute: Recommended for ferrous materials. The low flute count allows for excellent chip clearance for general purpose roughing and slotting. Ideal for steel, stainless, and cast iron. 
  - 5-flute: Recommended for ferrous materials. Higher flute count increases the tool strength, but reduces the cut depths. Ideal for finishing or high-efficiency milling in steel, stainless, cast iron, and harder materials.
  - 6-flute: Recommended for ferrous materials. High flute count yields a thicker core for greater tool strength and less deflection, while increasing material removal rates. Ideal for high-efficiency/high-speed milling in steel, stainless, cast iron, and high-temp alloys. 
+
 
 
 --------------------------------------------------------------------------------------------------------------------------------------
