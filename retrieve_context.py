@@ -19,8 +19,8 @@ from langchain_openai import OpenAIEmbeddings
 # ---------------------------------------------------------------------------
 _DOC_PATH = Path("CAM.txt")                  # technical formulary
 _INDEX_DIR = Path("vectorstore")             # persistent FAISS folder
-_CHUNK_SIZE = 700                            # characters per chunk
-_CHUNK_OVERLAP = 50                          # overlap for better context
+_CHUNK_SIZE = 1000                           # characters per chunk
+_CHUNK_OVERLAP = 100                         # overlap for better context
 
 # ---------------------------------------------------------------------------
 # INITIALISE (load env, embeddings)

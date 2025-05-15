@@ -18,7 +18,7 @@ Answer the question with one word. You are not allowed to add any extra words, s
 # Compute the MRR for the initial facing operation
 # Given constants C=450 and n=0.2 use the Taylor's formula to compute the tool life in min for the tool used for facing operation
 # Compute the cutting speed for the initial facing operation
-question = "Compute the cutting speed for the initial facing operation"
+question = "Given the tool's entering angle k_re = 90°, compute the average chip thickness h_av for the initial facing operation"
 
 # === Ask user to select a .txt file ===
 root = tk.Tk()
