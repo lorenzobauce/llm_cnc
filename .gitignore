@@ -4,6 +4,10 @@ __pycache__/
 *$py.class
 *.pyc
 
+# File FAISS e modelli serializzati
+# index.faiss
+# index.pkl
+
 # C extensions
 *.so
 

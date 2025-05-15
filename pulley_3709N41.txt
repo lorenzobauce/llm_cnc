@@ -1,0 +1,77 @@
+## Consideration
+
+The part dimensions fit within the machine's capabilities. Here's a breakdown:
+
+- **Pulley Dimensions**:
+  - Pitch Diameter: 191.0 mm
+  - Maximum Diameter: 189.1 mm
+  - Shaft Diameter: 16.0 mm
+  - Max Belt Width: 31.0 mm
+  - Part Width: 22.0 mm
+
+- **Machine Specifications**:
+  - Max X/Y/Z Axis Stroke: 650/550/475 mm
+  - Max Workpiece Diameter: 630 mm
+  - Max Workpiece Height: 600 mm
+  - Max Workpiece Weight: 300 kg
+
+The part dimensions and weight are well within the machine's capacities. Tool reach for the pulley is achievable with the available tool library.
+
+## Process Plan
+
+### Setup
+- Material: Aluminum
+- Fixture: Secure in a 3-jaw chuck or suitable fixture to avoid collisions.
+
+### Operations
+
+1. **Facing**
+   - **Tool**: Endmill D=25 mm (Tool ID: 12)
+   - **Operation**: Face Milling
+   - **Spindle Speed (n)**: 6000 RPM
+   - **Feedrate (Vf)**: 2500 mm/min
+   - **Depth/Pass (ap)**: 0.5 mm
+   - **Side Engagement (ae)**: 18 mm
+   - **Coolant**: On
+
+2. **Rough Outer Diameter**
+   - **Tool**: Endmill D=16 mm (Tool ID: 9)
+   - **Operation**: Adaptive Clearing
+   - **Spindle Speed (n)**: 6000 RPM
+   - **Feedrate (Vf)**: 2500 mm/min
+   - **Depth/Pass (ap)**: 5 mm
+   - **Side Engagement (ae)**: 12 mm
+   - **Coolant**: On
+
+3. **Profile Finish**
+   - **Tool**: Endmill D=10 mm (Tool ID: 6)
+   - **Operation**: Contour
+   - **Spindle Speed (n)**: 8000 RPM
+   - **Feedrate (Vf)**: 2000 mm/min
+   - **Depth/Pass (ap)**: 0.5 mm
+   - **Side Engagement (ae)**: 1 mm
+   - **Coolant**: On
+
+4. **Cut Internal Bore**
+   - **Tool**: Drill D=16 mm (Tool ID: 29)
+   - **Operation**: Drilling
+   - **Spindle Speed (n)**: 1200 RPM
+   - **Feedrate (Vf)**: 300 mm/min
+   - **Coolant**: On
+   - **Notes**: Use pecking method
+
+5. **Mill Teeth**
+   - **Tool**: Endmill D=3 mm (Tool ID: 1)
+   - **Operation**: 3D Swarf Milling
+   - **Spindle Speed (n)**: 10000 RPM
+   - **Feedrate (Vf)**: 1500 mm/min
+   - **Depth/Pass (ap)**: 0.5 mm
+   - **Side Engagement (ae)**: 0.3 mm
+   - **Coolant**: On
+
+### Notes
+- Ensure proper simulation for potential collision on the profile finish.
+- Adjust speeds/feeds according to form tool wear and machine specific dynamics.
+- Consider a trial run to ensure dimensional accuracy.
+
+This plan utilizes the DMG MORI DMU 50 eVo machine efficiently for creating the pulley with the available tooling, maintaining considerations for material properties and machine capabilities.

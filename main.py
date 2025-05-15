@@ -64,7 +64,7 @@ def ask_save_location():
 # =========================== MAIN PROGRAM =========================== #
 
 # STEP 1 – choose image
-image_path = choose_image_file(directory="drawings")
+image_path = choose_image_file(directory="dataset")
 # dimensions = extract_dimensions_from_image(image_path)
 # print("Extracted dimensions:", dimensions)
 
