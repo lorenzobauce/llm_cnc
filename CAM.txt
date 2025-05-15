@@ -41,23 +41,24 @@ Z                                            -> Total number of teeth
 D                                            -> Tool diameter [mm]
 k_re                                         -> Entering angle [rad]
 θ                                            -> Instantaneous angular position [rad]
-φ     = 2 · acos(1 - 2 · a_e / D)            -> Engagement angle [rad] (symmetrical case)
+φ     = 2 · acos(1 - 2 · a_e/D)              -> Engagement angle [rad] (symmetrical case)
 φ_0   = 2π / Z                               -> Angle between teeth [rad]
 v_f   = f_z · z · n                          -> Feed rate [mm/min]
 v_c   = π · D · n / 1000                     -> Cutting speed [m/min]
 f_z   = v_f / (n · z)                        -> Feed per tooth [mm/tooth]
 
 # Slab Milling (Peripherical)
-h_{D,θ} = f_z · sin(θ)                       -> Chip thickness [mm]
-A_{D,θ} = h_{D,θ} · a_p                      -> Chip area [mm^2]
-h_{D,av} = (2 · f_z · a_e) / (φ · D)         -> Average chip thickness [mm] (to be used if z>2)
-A_{D,av} = (2 · f_z · a_e · a_p) / (φ · D)   -> Average chip area [mm^2]
+h_θ = f_z · sin(θ)                           -> Chip thickness [mm]
+A_θ = h_θ · a_p                              -> Chip area [mm^2]
+h_av = f_z · sqrt(a_e/D)                     -> Average chip thickness when a_e/D ≤ 0.1 [mm]
+h_av = (f_z · a_e · sin(k_re) · 180) / (π · D · arcsin(a_e/D))  -> Average chip thickness when a_e/D > 0.1 [mm]
+A_av = (2 · f_z · a_e · a_p) / (φ · D)       -> Average chip area [mm^2]
 
 # Face Milling (Frontal)
-h_{D,θ} = f_z · cos(θ) · sin(k_re)           -> Chip thickness [mm]
-A_{D,θ} = h_{D,θ} · a_p                      -> Chip area [mm^2]
-h_{D,av} = (2 · f_z · a_e · sin(k_re)) / (φ · D)  -> Average chip thickness [mm] (to be used if z>2)
-A_{D,av} = (2 · f_z · a_e · a_p) / (φ · D)   -> Average chip area [mm^2]
+h_θ = f_z · cos(θ) · sin(k_re)               -> Chip thickness [mm]
+A_θ = h_θ · a_p                              -> Chip area [mm^2]
+h_av = (2 · f_z · a_e · sin(k_re)) / (φ · D) -> Average chip thickness [mm] (to be used if z>2)
+A_av = (2 · f_z · a_e · a_p) / (φ · D)       -> Average chip area [mm^2]
 
 # Cutting Force and Power
 F_{c(θ)} = k_{c,θ} · A_{D,θ}                 -> Cutting force [N]
