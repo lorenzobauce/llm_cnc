@@ -78,7 +78,7 @@ with open(machine_file) as f:
 
 
 # STEP 4 – build RAG prompt + call LLM
-context_chunks = get_relevant_context(text_description, k=6)
+context_chunks = get_relevant_context(text_description, k=8)
 print("\n=== Context chunks ===\n")
 for i, chunk in enumerate(context_chunks, 1):
     print(f"[{i}] {chunk}\n")
