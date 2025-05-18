@@ -1,16 +1,11 @@
-# === Core LLM & config ===
-pip install openai tiktoken pydantic python-dotenv
+pip install dotenv openai tiktoken pydantic python-dotenv
+pip install pandas numpy matplotlib tabulate ipywidgets rich inquirer 
+pip install langchain langchain_community langchain_openai
+pip install faiss-cpu faiss-gpu 
 
-# === STEP and mesh handling ===
-pip install trimesh numpy-stl
-
-# === G-code parsing/generation ===
-pip install pygcode gcodeparser
-
-# === Data and visualization ===
-pip install pandas numpy matplotlib tabulate ipywidgets rich
-
-# === Tools required to extract dimension from techical drawings ===
-pip install easyocr opencv-python numpy
-sudo apt install tesseract-ocr
-pip install pytesseract
+## For further developments try with recognition from step files
+# pip install trimesh numpy-stl
+#pip install pygcode gcodeparser
+# pip install easyocr opencv-python
+# sudo apt install tesseract-ocr
+# pip install pytesseract
