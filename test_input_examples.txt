@@ -15,3 +15,5 @@ Prompt examples:
 Tell me a comlete CAM process for the current part. The part is made of Aluminum. 
 Tell me a comlete CAM process for the current part. The part is made of Aluminum. If you are capable, generate a G-Code example for my 5 axis CNC machine.
 The pulley is made of Aluminum. Please give me all the dimension you see in the image and all the info you can get from the technical drawing.
+
+I want you to generate a complete cam process for the part in the image.

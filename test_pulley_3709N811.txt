@@ -1,0 +1,71 @@
+## Consideration
+
+The part is manufacturable within the machine's capabilities. The dimensions fit within the DMG MORI DMU 50 eVo's travel limits, and the weight is well under the machine's capacity. The available tool library provides sufficient length of cut for operations required in machining this steel pulley. The spindle torque and power are adequate for both roughing and finishing operations.
+
+- **Part Dimensions**: 
+  - Outer Diameter: 131 mm
+  - Bore Diameter: 16 mm
+  - Total Width: 31 mm
+
+- **Machine Limits**: 
+  - Maximum XYZ Travel: X: 650 mm, Y: 550 mm, Z: 475 mm
+  - Max Workpiece Weight: 300 kg
+  - Max Spindle Power: 21 kW
+
+- **Tool Reach**: Supports operations up to the required depths.
+
+## Process Plan
+
+### Setup
+- **Material**: Steel
+- **Fixture**: Secure clamping on rotary table for 5-axis operations.
+
+### Operations
+
+1. **Face Milling**
+   - **Tool ID**: 12 (Endmill, D = 25 mm)  
+   - **Operation**: Face Milling
+   - **Spindle Speed (n)**: 4000 RPM
+   - **Feedrate (Vf)**: 3000 mm/min
+   - **Depth/Pass (ap)**: 2 mm
+   - **Side Engagement (ae)**: 20 mm
+   - **Coolant**: On
+  
+2. **Roughing the Outer Profile**
+   - **Tool ID**: 22 (Roughing endmill, D = 16 mm)  
+   - **Operation**: Adaptive Clearing
+   - **Spindle Speed (n)**: 5000 RPM
+   - **Feedrate (Vf)**: 4000 mm/min
+   - **Depth/Pass (ap)**: 8 mm
+   - **Side Engagement (ae)**: 3 mm
+   - **Coolant**: On
+  
+3. **Bore Machining**
+   - **Tool ID**: 4 (Endmill, D = 6 mm)  
+   - **Operation**: Helical Milling
+   - **Spindle Speed (n)**: 6000 RPM
+   - **Feedrate (Vf)**: 2000 mm/min
+   - **Depth/Pass (ap)**: 3 mm
+   - **Coolant**: On
+  
+4. **Finishing the Outer Profile**
+   - **Tool ID**: 9 (Endmill, D = 16 mm)  
+   - **Operation**: Contour Milling
+   - **Spindle Speed (n)**: 5500 RPM
+   - **Feedrate (Vf)**: 2500 mm/min
+   - **Depth/Pass (ap)**: 1 mm
+   - **Side Engagement (ae)**: 1 mm
+   - **Coolant**: On
+   
+5. **Tooth Machining**
+   - **Tool ID**: 15 (Ballmill, D = 5 mm)  
+   - **Operation**: 3D Contour Milling
+   - **Spindle Speed (n)**: 7000 RPM
+   - **Feedrate (Vf)**: 1500 mm/min
+   - **Depth/Pass (ap)**: 1 mm
+   - **Coolant**: On
+
+### Notes
+- Carefully simulate operations to ensure no collisions during tool change and 5-axis movement.
+- Verify the bore diameter with a gauge after machining to ensure tolerance limits.
+- Adjust toolpaths to minimize tool wear, especially during tooth profiling.

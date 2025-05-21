@@ -65,21 +65,39 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     """).strip()
 
     prompt = textwrap.dedent(f"""
-    You are an expert CAM engineer.
-
-    ## Part description / user goal
+    ### Part description / user goal
     {description}
     {machine_block}
     {manufacturability}
-
     ### Output requirements
-    • Start with a short consideration confirming manufacturability with the provided machine and tools.
-    • If YES: provide step-by-step process plan with sections.
-    • For each step include: Tool ID, operation type, spindle speed (n), feedrate (vf), depth/pass (ap), side engagement (ae), coolant on/off, notes.
-    • If NO: detail each blocking issue and suggest concrete actions.
-    • Write all equations and numbers in plain text using ASCII (e.g. n = 1000 * Vc / (pi * D)).
+    Please format the output exactly as follows:
+    
+    ## Consideration
+    A short paragraph confirming manufacturability, followed by a bullet list summarizing part dimensions, machine limits, and tool reach.
+    
+    ## Process Plan
+    # Setup
+    - Material
+    - Fixture
+
+    # Operations
+    Each operation must be in the format:
+    1. **Step name**
+        - **Tool**: Endmill D=25 mm (Tool ID: 12)
+        - **Operation**: Adaptive Clearing
+        - **Spindle Speed (n)**: 6000 RPM
+        - **Feedrate (Vf)**: 2500 mm/min
+        - **Depth/Pass (ap)**: 5 mm
+        - **Side Engagement (ae)**: 12 mm
+        - **Coolant**: On
+        - **Notes**: (Optional)
+
+    # Notes
+    List 2–3 notes regarding collision, tolerances, or simulation.
+
+    Use Markdown formatting. Numbers and equations should be in plain text (e.g., n = 1000 * Vc / (pi * D)). Only respond with the plan in this format.
     """)
 
     return prompt.strip()
 
-# Use Markdown formatting and LaTeX for any equations (e.g. `n = \\frac{{1000 \\cdot V_c}}{{\\pi \\cdot D}}`).
+    # Use Markdown formatting and LaTeX for any equations (e.g. `n = \\frac{{1000 \\cdot V_c}}{{\\pi \\cdot D}}`).
