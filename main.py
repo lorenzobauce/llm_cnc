@@ -1,109 +1,108 @@
-# main.py
-# Custom RAG + Vision LLM pipeline tailored for CAM engineering.
-import os
-import json
-import base64
-import inquirer
+# main.py – Vision-RAG + iterative validator loop
+from __future__ import annotations
+import os, json, base64, tempfile, shutil, inquirer, textwrap
+from pathlib import Path
 from tkinter import Tk, filedialog
-from prompt_utils import build_process_prompt
-from llm_client import call_llm
-from retrieve_context import get_relevant_context
+from rich.progress import Progress, SpinnerColumn, TextColumn
+
+from prompt_utils      import build_process_prompt
+from llm_client        import call_llm, call_llm_with_system
+from retrieve_context  import get_relevant_context
 from dimension_extractor import extract_geometry, summary_text
 
+import affordance_validator as av
+from cam_optimizer import optimise_plan
 
-# === Choose the component from the images in the dir ===
-def choose_image_file(directory: str = '.') -> str:
-    image_files = [f for f in os.listdir(directory) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-    if not image_files:
-        raise FileNotFoundError("No image files (.jpg/.png) found in this directory.")
-    questions = [
-        inquirer.List(
-            'image',
-            message="Select an image file:",
-            choices=image_files
-        )
-    ]
-    answers = inquirer.prompt(questions)
-    return os.path.join(directory, answers['image'])
+# ─────────────────────────────────────────────────────────────────────────────
+# UI helpers
+# ─────────────────────────────────────────────────────────────────────────────
+def _choose_file(msg: str, folder: str, exts: tuple[str, ...]) -> str:
+    files = [f for f in os.listdir(folder) if f.lower().endswith(exts)]
+    sel   = inquirer.prompt([inquirer.List("f", message=msg, choices=files)])
+    return Path(folder, sel["f"]).as_posix()
 
-# === Choose the machine tool from the current available in the dir ===
-def choose_machine_file(directory: str = '.') -> str:
-    json_files = [f for f in os.listdir(directory) if f.lower().endswith('.json')]
-    if not json_files:
-        raise FileNotFoundError("No machine spec files (.json) found in this directory.")
-    questions = [
-        inquirer.List(
-            'machine',
-            message="Select a machine spec file:",
-            choices=json_files
-        )
-    ]
-    answers = inquirer.prompt(questions)
-    return os.path.join(directory, answers['machine'])
+def ask_save_location() -> str | None:
+    root = Tk(); root.withdraw()
+    return filedialog.asksaveasfilename(defaultextension=".txt",
+                                        filetypes=[("Text files","*.txt")])
 
-# === Ask user where to save the file ===
-def ask_save_location():
-    root = Tk()
-    root.withdraw()
-    file_path = filedialog.asksaveasfilename(
-        defaultextension=".txt",
-        filetypes=[("Text files", "*.txt")],
-        title="Save process plan"
-    )
-    return file_path
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Pick drawing & encode
+# ─────────────────────────────────────────────────────────────────────────────
+image_path  = _choose_file("Select drawing", "dataset", (".png", ".jpg", ".jpeg"))
+img_b64     = base64.b64encode(Path(image_path).read_bytes()).decode()
+image_data  = f"data:image/jpeg;base64,{img_b64}"
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 2. Auto-geometry + user input
+# ─────────────────────────────────────────────────────────────────────────────
+geo = extract_geometry(image_data)
+print("\n--- Geometry ---\n" + summary_text(geo) + "\n")
 
-# =========================== MAIN PROGRAM =========================== #
+user_prompt   = input("❓ Describe what you want to machine / ask CAM assistant: ")
+material_desc = input("❓ Material description: ")
+text_desc     = textwrap.dedent(f"""
+                                {user_prompt}
+                                Material description: {material_desc}
+                                {summary_text(geo)}
+                                """)
 
-# STEP 1 – choose image
-image_path = choose_image_file(directory="dataset")
-with open(image_path, "rb") as f:
-    img_base64 = base64.b64encode(f.read()).decode()
-image_data_url = f"data:image/jpeg;base64,{img_base64}"
+# ─────────────────────────────────────────────────────────────────────────────
+# 3. Machine selection
+# ─────────────────────────────────────────────────────────────────────────────
+machine_file = _choose_file("Select machine", "machines", (".json",))
+machine_spec = json.loads(Path(machine_file).read_text())
 
-
-# STEP 2 – automatic + interactive geometry extraction
-geometry = extract_geometry(image_data_url)
-geometry_summary = summary_text(geometry)
-print ("\n--- Extracted Geometry ---\n")
-print(geometry_summary)
-user_query = input("\nDescribe what you want to machine / ask the CAM assistant: ")
-text_description = user_query.strip() + "\n\n" + geometry_summary
-
-
-# STEP 3 – choose machine spec
-machine_file = choose_machine_file(directory="machines")
-with open(machine_file) as f:
-    machine_spec = json.load(f)
-
-
-# STEP 4 – build RAG prompt + call LLM
-context_chunks = get_relevant_context(text_description, k=8)
-print("\n=== Context chunks ===\n")
-for i, chunk in enumerate(context_chunks, 1):
-    print(f"[{i}] {chunk}\n")
-
-wait = input("Press Enter to continue...")
-
-context_block  = "\n\n".join(context_chunks)
-prompt = (
-    build_process_prompt(text_description, machine_spec)
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. Build RAG prompt & get initial plan
+# ─────────────────────────────────────────────────────────────────────────────
+ctx_chunks = get_relevant_context(text_desc, k=8)
+rag_prompt = (
+    build_process_prompt(text_desc, machine_spec)
     + "\n\n### Technical context (from CAM formulary)\n"
-    + context_block
+    + "\n\n".join(ctx_chunks)
 )
-response = call_llm(prompt, image_data_url)
+
+print("\nCalling GPT-4o for initial plan …")
+with Progress(SpinnerColumn(), TextColumn("Generating…")) as bar:
+    t = bar.add_task("llm"); bar.start_task(t)
+    init_plan = call_llm_with_system(rag_prompt,
+                                     image_data,
+                                     system_message="You are an expert mechanical CAM engineer who assist the user developing the complete manufacturing process.")
+    bar.stop_task(t)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. Interactive optimisation loop (calls cam_optimizer)
+# ─────────────────────────────────────────────────────────────────────────────
+tmp_dir  = tempfile.mkdtemp(prefix="cam_iter_")
+tmp_file = Path(tmp_dir, "plan_0.txt"); tmp_file.write_text(init_plan, encoding="utf-8")
+context_block = "\n\n".join(ctx_chunks)      
+tmp_file.write_text(init_plan, encoding="utf-8")
+
+final_plan = optimise_plan(
+    tmp_file.as_posix(),
+    machine_file,
+    material_desc,
+    image_url=None,
+    description=text_desc,
+    context_block=context_block
+)
 
 
-# STEP 5 – show result
-print("\n--- CNC Process Plan ---\n")
-print(response)
+# ─────────────────────────────────────────────────────────────────────────────
+# 6. Show final plan + validator, then ask to save
+# ─────────────────────────────────────────────────────────────────────────────
+print("\n--- FINAL CNC PROCESS PLAN ---\n")
+print(final_plan)
 
+print("\n--- FINAL VALIDATOR REPORT ---\n")
+print(av.summarize_validation(final_plan, machine_spec, material_desc))
 
-# STEP 6 – ask where to save
-save_path = ask_save_location()
-if save_path:
-    with open(save_path, "w", encoding="utf-8") as f:
-        f.write(response)
-    print(f"\nProcess plan saved to: {save_path}")
+save = ask_save_location()
+if save:
+    Path(save).write_text(final_plan, encoding="utf-8")
+    print("\n\n✅ Saved to:", save)
 else:
-    print("\n[Skipped] File was not saved.")
+    print("\n\n⚠️ [Skipped] File was not saved.")
+
+shutil.rmtree(tmp_dir)
