@@ -74,20 +74,19 @@ with Progress(SpinnerColumn(), TextColumn("Generating…")) as bar:
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. Interactive optimisation loop (calls cam_optimizer)
 # ─────────────────────────────────────────────────────────────────────────────
+# Create a temporary directory to store the plan file and write the initial plan to it
 tmp_dir  = tempfile.mkdtemp(prefix="cam_iter_")
-tmp_file = Path(tmp_dir, "plan_0.txt"); tmp_file.write_text(init_plan, encoding="utf-8")
-context_block = "\n\n".join(ctx_chunks)      
-tmp_file.write_text(init_plan, encoding="utf-8")
+tmp_file = Path(tmp_dir, "plan_0.txt")
+tmp_file.write_text(init_plan, encoding="utf-8")      
 
 final_plan = optimise_plan(
-    tmp_file.as_posix(),
-    machine_file,
-    material_desc,
-    image_url=None,
-    description=text_desc,
-    context_block=context_block
+   description=text_desc,
+   plan_path=tmp_file.as_posix(),
+   machine_path=machine_file,
+   material_desc=material_desc,
+   image_url=image_data,
+   context_block="\n\n".join(ctx_chunks),
 )
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 6. Show final plan + validator, then ask to save

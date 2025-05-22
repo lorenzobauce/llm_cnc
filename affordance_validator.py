@@ -7,24 +7,28 @@ import parse_cam_formulary as cam
 
 _STEP_HDR = re.compile(
     r"""
-    ^\s*                      # optional leading spaces
-    (?:\#+\s*)?                # optional markdown header like ### or ##
-    (\d+)                     # step number (captured)
-    [\.\)]\s*                 # dot or parenthesis like "3." or "3)"
-    (?:\*\*|__)?              # optional opening bold (** or __)
-    (.+?)                     # the title (non-greedy)
-    (?:\*\*|__)?              # optional closing bold
-    \s*$                     # end of line
+    ^\s*
+    (?:\#+\s*)?          # markdown header (optional)
+    (\d+)                # step number
+    [\.\)]\s*
+    (?:\*\*|__)?         # opening bold (optional)
+    ([^*\n]+?)           # TITLE (group-2 !)
+    (?:\*\*|__)?         # closing bold (optional)
+    \s*$
     """,
-    re.MULTILINE | re.VERBOSE
+    re.MULTILINE | re.VERBOSE,
 )
 
 _NUM = re.compile(r"([\d\.]+)")
 
-def _strategy(name: str) -> str:
-    name = name.lower()
-    if any(k in name for k in ("finish", "swarf")): return "finishing"
-    if "slot" in name: return "slotting"
+def _strategy(text: str, op_line: str = "") -> str:
+    txt = f"{text} {op_line}".lower()
+    if any(k in txt for k in ("finish", "finishing", "swarf", "semi-finish", "contour", "contouring", "taper", "tapering", "profile", "profiling")):
+        return "finishing"
+    if any(k in txt for k in ("drill", "bore", "ream", "reamer", "tapping", "tap")):
+        return "drilling"
+    if any(k in txt for k in ("slot", "slotting", "slitting", "groove", "grooving", "keyway", "keywaying", "pocket", "pocketing")):
+        return "slotting"
     return "roughing"
 
 def parse_txt_plan(text: str) -> List[Dict]:
@@ -32,7 +36,13 @@ def parse_txt_plan(text: str) -> List[Dict]:
     headers = list(_STEP_HDR.finditer(text))
     for i, h in enumerate(headers):
         blk  = text[h.end(): headers[i + 1].start() if i + 1 < len(headers) else len(text)]
-        step = {"step": h.group(1).strip(), "strategy": _strategy(h.group(1))}
+        step_title = h.group(2).strip()
+        op_match  = re.search(r"Operation\s*:\s*([^\n]+)", blk, re.I)
+        op_line   = op_match.group(1) if op_match else ""
+        step = {
+            "step": step_title,
+            "strategy": _strategy(step_title, op_line)   # <── passa anche op_line
+        }
         patt = {
             "tool_id": r"Tool.*ID:\s*(\d+)",
             "tool_dia": r"D\s*=\s*(\d+\.?\d*)\s*mm",
@@ -47,7 +57,8 @@ def parse_txt_plan(text: str) -> List[Dict]:
                 step[k] = float(m.group(1)) if "." in m.group(1) else int(m.group(1))
         if "tool_id" in step:
             steps.append(step)
-        print(f"[DEBUG] Parsed {len(steps)} steps.")
+            
+        print(f"[DEBUG] Parsed {len(steps)} steps.") # debug - comment this line if not needed
 
     return steps
 
@@ -74,6 +85,7 @@ def _loc_to_mm(loc_val, tool_dia: float) -> float:
 
 def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) -> Tuple[bool, List[str]]:
     tool  = _find_tool(step.get("tool_id"), tools)
+    skip_ae = step["strategy"] == "drilling" or tool.get("type") == "ballmill"
     calc  = _calc_values(step, tool)
     loc_mm= _loc_to_mm(tool.get("loc", math.inf), calc["D"])
 
@@ -84,6 +96,7 @@ def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) ->
         issues.append("feed > machine limit"); ok=False
     if step.get("ap", 0) > loc_mm:
         issues.append("ap exceeds tool LOC"); ok=False
+    
     # material limits
     lim   = cam.get_limits_for(mat_tag)
     strat = step["strategy"]
@@ -100,7 +113,7 @@ def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) ->
 
     # engagement ratios
     eng = cam.get_engagement_limits(strat)
-    if calc["D"]:
+    if calc["D"] and not skip_ae:
         apR = step.get("ap", 0) / calc["D"]
         aeR = step.get("ae", 0) / calc["D"]
         ap_lo, ap_hi = eng["ap_d"]
@@ -109,7 +122,6 @@ def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) ->
             issues.append(f"ap/D {apR:.2f} outside [{ap_lo:.1f},{ap_hi:.1f}]")
         if not (ae_lo <= aeR <= ae_hi):
             issues.append(f"ae/D {aeR:.2f} outside [{ae_lo:.1f},{ae_hi:.1f}]")
-
     return ok, issues
 
 def _flagged(label: str, val, faulty_keys: set[str]) -> str:
@@ -134,7 +146,7 @@ def summarize_step(step: dict, ok: bool, issues: list[str]) -> str:
     )
     out = [f"{status} {step['step']}"]
     out.append("   " + _flagged("tool", line1, faulty))
-    out.append("   " + _flagged("ap",   line2, faulty))
+    out.append("   " + _flagged("cut",  line2, faulty))
     for i in issues:
         out.append(f"   - ⚠️ {i}")
     return "\n".join(out)

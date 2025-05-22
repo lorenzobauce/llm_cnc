@@ -36,6 +36,8 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     Max X axis stroke: {machine.get('max_X_axis_stroke','?')} mm
     Max Y axis stroke: {machine.get('max_Y_axis_stroke','?')} mm
     Max Z axis stroke: {machine.get('max_Z_axis_stroke','?')} mm
+    Min A axis swivel angle: {machine.get('A_axis_min_swivel_angle','?')} ° (if applicable)
+    Max A axis swivel angle: {machine.get('A_axis_max_swivel_angle','?')} ° (if applicable)
     Min B axis swivel angle: {machine.get('B_axis_min_swivel_angle','?')} ° (if applicable)
     Max B axis swivel angle: {machine.get('B_axis_max_swivel_angle','?')} ° (if applicable)
     Raneg C axis swivel angle: {machine.get('C_axis_swivel_angle','?')} ° (if applicable)
@@ -81,6 +83,8 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     - Fixture
 
     # Operations
+    If multiple operations are required, number them sequentially (1, 2, 3, ...).
+    Take into account providing both roughing and finishing operations if applicable or required.
     Each operation must be in the format:
     1. **Step name**
         - **Tool**: Endmill D=25 mm (Tool ID: 12)

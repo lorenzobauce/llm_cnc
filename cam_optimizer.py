@@ -10,34 +10,31 @@ At each round:
 
 from __future__ import annotations
 import json
+import textwrap
 from pathlib import Path
 from typing import List, Dict, Tuple
-
-# --- Validator & formatting
 import affordance_validator as av
 from affordance_validator import summarize_validation
 from prompt_utils import build_process_prompt
-
-# --- LLM
+from prompt_utils import _fmt_tool_list
 from llm_client import client as _openai
 from llm_client import call_llm_with_system
-
-# --- Progress bar
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-
+# ─────────────────────────────────────────────────────────────────────────────
 MODEL = "gpt-4o"
-
+# ─────────────────────────────────────────────────────────────────────────────
 
 def _read(p: str) -> str:
     return Path(p).read_text(encoding="utf-8")
 
 
-def optimise_plan(plan_path: str,
+def optimise_plan(
+                  description: str,
+                  plan_path: str,
                   machine_path: str,
                   material_desc: str,
                   image_url: str | None = None,
-                  description: str = "",
                   context_block: str = "") -> str:
 
     """
@@ -45,9 +42,39 @@ def optimise_plan(plan_path: str,
     Returns final plan string.
     """
     plan_txt = _read(plan_path)
-    machine  = json.loads(_read(machine_path))
+    machine = json.loads(_read(machine_path))    
     tools    = machine.get("tool_library", [])
     tag      = av.cam.infer_material_tag(material_desc)
+    
+    tool_block = _fmt_tool_list(machine.get("tool_library", []))
+
+    machine_block = textwrap.dedent(f"""
+    ### CNC Machine Specifications
+    Name: {machine.get('name','')}
+    Axes: {machine.get('axes','')}
+    Max X axis stroke: {machine.get('max_X_axis_stroke','?')} mm
+    Max Y axis stroke: {machine.get('max_Y_axis_stroke','?')} mm
+    Max Z axis stroke: {machine.get('max_Z_axis_stroke','?')} mm
+    Min A axis swivel angle: {machine.get('A_axis_min_swivel_angle','?')} ° (if applicable)
+    Max A axis swivel angle: {machine.get('A_axis_max_swivel_angle','?')} ° (if applicable)
+    Min B axis swivel angle: {machine.get('B_axis_min_swivel_angle','?')} ° (if applicable)
+    Max B axis swivel angle: {machine.get('B_axis_max_swivel_angle','?')} ° (if applicable)
+    Raneg C axis swivel angle: {machine.get('C_axis_swivel_angle','?')} ° (if applicable)
+    Max workpiece diameter: {machine.get('max_workpiece_diameter','?')} mm
+    Max workpiece height: {machine.get('max_workpiece_height','?')} mm
+    Max workpiece weight: {machine.get('max_workpiece_weight','?')} kg
+    Max spindle RPM: {machine.get('max_spindle_rpm','?')} rpm
+    Max feed rate: {machine.get('max_feed_rate','?')} mm/min
+    Max spindle power: {machine.get('spindle_power', '?')} kW
+    Max spindle torque: {machine.get('spindle_torque', '?')} N·m
+    Tool change type: {machine.get('tool_change_type','?')}
+    Storage capacity {machine.get('tool_storage_capacity','?')} tools
+
+    #### Tool Library
+    {tool_block}
+    """).strip()
+
+# ─────────────────────────────────────────────────────────────────────────────
 
     while True:
         print("\n--- CNC PROCESS PLAN ---\n")
@@ -56,7 +83,7 @@ def optimise_plan(plan_path: str,
         print("\n--- AFFORDANCE VALIDATOR REPORT ---\n")
         print(summarize_validation(plan_txt, machine, material_desc))
 
-        answer = input("\nWould you like to regenerate with corrections? [y/N]: ").strip().lower()
+        answer = input("\n❓ Would you like to regenerate with corrections? [y/N]: ").strip().lower()
         if answer != "y":
             break
 
@@ -65,16 +92,32 @@ def optimise_plan(plan_path: str,
         issues, fixes = _collect_issues(steps, machine, tag, tools)
 
         # build prompt
-        prompt = (
-            build_process_prompt(description, machine)
-            + "\n\n### Technical context (from CAM formulary)\n"
-            + context_block
-            + "\n\n"
-            + "## Tentative process plan\n {plan_txt} \n\n"
-            + "## Detected issues\n" + "\n".join(issues) + "\n\n"
-            + "## Mandatory parameter fixes\n" + "\n".join(fixes) + "\n\n"
-            + "Regenerate the **entire process plan**, keeping the same numbering and headings, but apply only the corrected parameters."
-        )
+        prompt = textwrap.dedent(f"""
+            ## Below is the current process plan for the part imported as image with detected issues.
+            **Please regenerate the entire process plan, keeping the same numbering, headings, and all the fields that are existing.**
+            **Substitute only the corrected parameters (n, Vf, ap, ae) that are suggested.**
+                                 
+            ## Part description / user goal
+            {description}
+            
+            ## Process plan
+            {plan_txt}
+
+            ## Detected issues
+            {chr(10).join(issues)}
+
+            ## Suggested fixes
+            {chr(10).join(fixes)}
+
+            ## Contextual information
+            {context_block}
+
+            {machine_block}
+
+            ## Tool Library
+            {tool_block}
+   
+        """)
 
 
         # call LLM
@@ -82,7 +125,7 @@ def optimise_plan(plan_path: str,
             t = bar.add_task("llm"); bar.start_task(t)
             if image_url:
                 plan_txt = call_llm_with_system(prompt, image_url,
-                                                system_message="You are an expert CAM engineer.",
+                                                system_message="You are an expert mechanical CAM engineer who assist the user developing the complete manufacturing process.",
                                                 model=MODEL)
             else:
                 res = _openai.chat.completions.create(

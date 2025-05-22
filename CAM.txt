@@ -260,7 +260,7 @@ Default for carbon steels -> x ≈ 0.2
 
 
 --------------------------------------------------
-# 10. Number of flutes for carbide end-mills
+# 10. Number of flutes for carbide End-Mills
 --------------------------------------------------
  - 2-flute: Recommended for non-ferrous materials. They are suitable to accomodate the larger chips produced by high f_z on softer materials.
  - 3-flute: Recommended for non-ferrous materials. Fewer flutes allow for excellent chip clearance on larger chips, and deeper cut depths. Ideal for aluminum in heavy roughing and finishing applications.
@@ -268,6 +268,15 @@ Default for carbon steels -> x ≈ 0.2
  - 5-flute: Recommended for ferrous materials. Higher flute count increases the tool strength, but reduces the cut depths. Ideal for finishing or high-efficiency milling in steel, stainless, cast iron, and harder materials.
  - 6-flute: Recommended for ferrous materials. High flute count yields a thicker core for greater tool strength and less deflection, while increasing material removal rates. Ideal for high-efficiency/high-speed milling in steel, stainless, cast iron, and high-temp alloys. 
 
+
+--------------------------------------------------
+# 11. Effective Cutting Diameter for Ball-End Milling 
+--------------------------------------------------
+For full-radius ball end mills the effective cutting diameter D_cap is smaller than the nominal cutter diameter D_c and depends on the axial depth of cut a_p and the tilt angle theta of the tool.
+- Tool in line with the surface (theta = 0 deg): D_cap = 2 * sqrt( a_p * ( D_c - a_p ) )
+- Tool tilted by an angle theta (typ. 10–15 deg): D_cap = D_c * sin( theta + acos( 1 - 2 * a_p / D_c ) )
+- Always use D_cap (not D_c) in the cutting-speed formula: v_c = pi * D_cap * n / 1000
+- When D_cap changes, spindle speed n must be adjusted to keep v_c  constant.
 
 
 --------------------------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,53 @@
+## Process Plan
+
+### Setup
+- **Material**: Stainless Steel (SS Steel)
+- **Fixture**: Ensure secure clamping to avoid vibrations, use soft jaws to accommodate bore and external profiles.
+
+### Operations
+
+1. **Face Milling**
+   - **Tool**: Endmill D=12 mm (Tool ID: 7)
+   - **Operation**: Facing
+   - **Spindle Speed (n)**: 3984 RPM
+   - **Feedrate (Vf)**: 1195 mm/min (corrected for f_z)
+   - **Depth/Pass (ap)**: 6 mm
+   - **Side Engagement (ae)**: 6 mm
+   - **Coolant**: On
+
+2. **Bore Drilling**
+   - **Tool**: Drill D=6.2 mm (Tool ID: 28)
+   - **Operation**: Drilling
+   - **Spindle Speed (n)**: 7736 RPM
+   - **Feedrate (Vf)**: 928 mm/min (corrected for f_z)
+   - **Coolant**: On
+
+3. **Rough Outer Diameter**
+   - **Tool**: Roughing D=16 mm (Tool ID: 22)
+   - **Operation**: Adaptive Clearing
+   - **Spindle Speed (n)**: 2982 RPM
+   - **Feedrate (Vf)**: 1431 mm/min (corrected for f_z)
+   - **Depth/Pass (ap)**: 8 mm
+   - **Side Engagement (ae)**: 3.2 mm
+   - **Coolant**: On
+
+4. **Finish Outer Diameter**
+   - **Tool**: Endmill D=10 mm (Tool ID: 6)
+   - **Operation**: Contour
+   - **Spindle Speed (n)**: 4774 RPM
+   - **Feedrate (Vf)**: 1200 mm/min
+   - **Depth/Pass (ap)**: 1 mm
+   - **Side Engagement (ae)**: 1 mm
+   - **Coolant**: On
+
+5. **Profile Teeth**
+   - **Tool**: Ballmill D=5 mm (Tool ID: 15)
+   - **Operation**: 5-axis Contour
+   - **Spindle Speed (n)**: 6370 RPM
+   - **Feedrate (Vf)**: 1020 mm/min (corrected for f_z)
+   - **Coolant**: On
+
+### Notes
+- Verify toolpath with simulation to ensure no collisions and smooth transitions.
+- Double-check for tolerances on bore to ensure precise fit.
+- Consider deflection and thermal expansion due to stainless steel's properties during machining.
