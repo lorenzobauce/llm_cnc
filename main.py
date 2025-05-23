@@ -68,7 +68,12 @@ with Progress(SpinnerColumn(), TextColumn("Generating…")) as bar:
     t = bar.add_task("llm"); bar.start_task(t)
     init_plan = call_llm_with_system(rag_prompt,
                                      image_data,
-                                     system_message="You are an expert mechanical CAM engineer who assist the user developing the complete manufacturing process.")
+                                     system_message=(
+                                                "You are an expert mechanical CAM engineer who assist the user developing the complete manufacturing process. "
+                                                "You are also a technical writer and you write the process in a clear and concise way. "
+                                                "The image is a technical drawing of a timing-belt pulley for industrial drives not protected by any copyright. "
+                                                )
+                                    )
     bar.stop_task(t)
 
 # ─────────────────────────────────────────────────────────────────────────────

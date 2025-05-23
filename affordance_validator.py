@@ -5,6 +5,9 @@ from typing import Dict, List, Tuple
 
 import parse_cam_formulary as cam
 
+
+TOL_PCT = 0.05     # Soft limits
+
 _STEP_HDR = re.compile(
     r"""
     ^\s*
@@ -83,6 +86,11 @@ def _loc_to_mm(loc_val, tool_dia: float) -> float:
     num = float(m.group(1))
     return num * tool_dia if "x" in s and "d" in s else num
 
+def _out_of_band(value, lo, hi):
+    lo_soft = lo * (1 - TOL_PCT)
+    hi_soft = hi * (1 + TOL_PCT)
+    return value < lo_soft or value > hi_soft
+
 def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) -> Tuple[bool, List[str]]:
     tool  = _find_tool(step.get("tool_id"), tools)
     skip_ae = step["strategy"] == "drilling" or tool.get("type") == "ballmill"
@@ -103,13 +111,17 @@ def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) ->
     Vc_lo, Vc_hi = lim["Vc"]
     fz_lo, fz_hi = lim["fz_finish"] if strat == "finishing" else lim["fz_rough"]
 
-    if calc["Vc"] < Vc_lo or calc["Vc"] > Vc_hi:
-        issues.append(f"Vc {calc['Vc']:.0f} m/min outside [{Vc_lo:.1f},{Vc_hi:.1f}] for ISO {mat_tag}")
+    if _out_of_band(calc["Vc"], Vc_lo, Vc_hi):
+        issues.append(
+            f"Vc {calc['Vc']:.0f} m/min outside [{Vc_lo:.0f},{Vc_hi:.0f}]±{TOL_PCT*100:.0f}%"
+        )
         ok = False
 
-    if fz_lo and (calc["fz"] < fz_lo or calc["fz"] > fz_hi):
-        issues.append(f"f_z {calc['fz']:.3f} mm/tooth outside [{fz_lo:.2f},{fz_hi:.2f}]")
-        ok = False
+    if fz_lo:   # skip check if table gives (0,0)
+        if _out_of_band(calc["fz"], fz_lo, fz_hi):
+            issues.append(
+                f"f_z {calc['fz']:.3f} mm/tooth outside [{fz_lo:.3f},{fz_hi:.3f}]±{TOL_PCT*100:.0f}%"
+            )
 
     # engagement ratios
     eng = cam.get_engagement_limits(strat)
@@ -118,10 +130,10 @@ def validate_step(step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]) ->
         aeR = step.get("ae", 0) / calc["D"]
         ap_lo, ap_hi = eng["ap_d"]
         ae_lo, ae_hi = eng["ae_d"]
-        if not (ap_lo <= apR <= ap_hi):
-            issues.append(f"ap/D {apR:.2f} outside [{ap_lo:.1f},{ap_hi:.1f}]")
-        if not (ae_lo <= aeR <= ae_hi):
-            issues.append(f"ae/D {aeR:.2f} outside [{ae_lo:.1f},{ae_hi:.1f}]")
+        if _out_of_band(apR, ap_lo, ap_hi):
+            issues.append(f"ap/D {apR:.2f} outside [{ap_lo:.2f},{ap_hi:.2f}]")
+        if _out_of_band(aeR, ae_lo, ae_hi):
+            issues.append(f"ae/D {aeR:.2f} outside [{ae_lo:.2f},{ae_hi:.2f}]")
     return ok, issues
 
 def _flagged(label: str, val, faulty_keys: set[str]) -> str:
