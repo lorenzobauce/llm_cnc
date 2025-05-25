@@ -7,7 +7,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
-def call_llm(prompt: str, image_data_url: str, model: str = "gpt-4o") -> str:
+def call_llm(prompt: str, image_data_url: str, model: str = "gpt-4o-mini") -> str:
     messages = [
         {
             "role": "user",

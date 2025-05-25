@@ -63,7 +63,7 @@ rag_prompt = (
     + "\n\n".join(ctx_chunks)
 )
 
-print("\nCalling GPT-4o for initial plan …")
+print("\nCalling GPT-4o-mini for initial plan …")
 with Progress(SpinnerColumn(), TextColumn("Generating…")) as bar:
     t = bar.add_task("llm"); bar.start_task(t)
     init_plan = call_llm_with_system(rag_prompt,

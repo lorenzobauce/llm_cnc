@@ -22,7 +22,7 @@ from llm_client import call_llm_with_system
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # ─────────────────────────────────────────────────────────────────────────────
-MODEL = "gpt-4o"
+MODEL = "gpt-4o-mini"
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _read(p: str) -> str:
