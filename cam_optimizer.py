@@ -74,6 +74,15 @@ def optimise_plan(
     {tool_block}
     """).strip()
 
+    _FORMULA_BLOCK = """
+    ### Reference formulas (ASCII)
+    Vc  = (pi * D * n) / 1000          # Cutting speed  [m/min]
+    f_z = Vf / (n * z)                 # Feed per tooth [mm/tooth]
+    apD = ap / D                       # Axial depth ratio
+    aeD = ae / D                       # Radial engagement ratio
+    """
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 
     while True:
@@ -106,6 +115,8 @@ def optimise_plan(
             ## Detected issues
             {chr(10).join(issues)}
 
+            {_FORMULA_BLOCK}
+
             ## Suggested fixes
             {chr(10).join(fixes)}
 
@@ -133,6 +144,9 @@ def optimise_plan(
                     messages=[{"role": "user", "content": prompt}]
                 )
                 plan_txt = res.choices[0].message.content
+            if "i'm sorry" in plan_txt.lower() or "i am sorry" in plan_txt.lower():
+                from utils import save_llm_io
+                save_llm_io(prompt, plan_txt)     
             bar.stop_task(t)
 
     return plan_txt

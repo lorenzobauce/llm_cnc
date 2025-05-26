@@ -41,11 +41,11 @@ print("\n--- Geometry ---\n" + summary_text(geo) + "\n")
 
 user_prompt   = input("❓ Describe what you want to machine / ask CAM assistant: ")
 material_desc = input("❓ Material description: ")
-text_desc     = textwrap.dedent(f"""
-                                {user_prompt}
-                                Material description: {material_desc}
-                                {summary_text(geo)}
-                                """)
+text_desc = (
+    user_prompt
+    + "\nMaterial description: " + material_desc
+    + "\nGeometry description: " + summary_text(geo)
+)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. Machine selection
@@ -56,7 +56,7 @@ machine_spec = json.loads(Path(machine_file).read_text())
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. Build RAG prompt & get initial plan
 # ─────────────────────────────────────────────────────────────────────────────
-ctx_chunks = get_relevant_context(text_desc, k=8)
+ctx_chunks = get_relevant_context(text_desc, k=6)
 rag_prompt = (
     build_process_prompt(text_desc, machine_spec)
     + "\n\n### Technical context (from CAM formulary)\n"
@@ -74,6 +74,9 @@ with Progress(SpinnerColumn(), TextColumn("Generating…")) as bar:
                                                 "The image is a technical drawing of a timing-belt pulley for industrial drives not protected by any copyright. "
                                                 )
                                     )
+    if "i'm sorry" in init_plan.lower() or "i am sorry" in init_plan.lower():
+        from utils import save_llm_io
+        save_llm_io(rag_prompt, init_plan) 
     bar.stop_task(t)
 
 # ─────────────────────────────────────────────────────────────────────────────

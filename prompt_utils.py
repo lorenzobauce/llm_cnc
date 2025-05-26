@@ -40,7 +40,7 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     Max A axis swivel angle: {machine.get('A_axis_max_swivel_angle','?')} ° (if applicable)
     Min B axis swivel angle: {machine.get('B_axis_min_swivel_angle','?')} ° (if applicable)
     Max B axis swivel angle: {machine.get('B_axis_max_swivel_angle','?')} ° (if applicable)
-    Raneg C axis swivel angle: {machine.get('C_axis_swivel_angle','?')} ° (if applicable)
+    Range C axis swivel angle: {machine.get('C_axis_swivel_angle','?')} ° (if applicable)
     Max workpiece diameter: {machine.get('max_workpiece_diameter','?')} mm
     Max workpiece height: {machine.get('max_workpiece_height','?')} mm
     Max workpiece weight: {machine.get('max_workpiece_weight','?')} kg
@@ -69,8 +69,11 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     prompt = textwrap.dedent(f"""
     ### Part description / user goal
     {description}
+
     {machine_block}
+
     {manufacturability}
+    
     ### Output requirements
     Please format the output exactly as follows:
     

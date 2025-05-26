@@ -26,6 +26,8 @@ _NUM = re.compile(r"([\d\.]+)")
 
 def _strategy(text: str, op_line: str = "") -> str:
     txt = f"{text} {op_line}".lower()
+    if any(k in txt for k in ("rough", "roughing")):
+        return "roughing"
     if any(k in txt for k in ("finish", "finishing", "swarf", "semi-finish", "contour", "contouring", "taper", "tapering", "profile", "profiling")):
         return "finishing"
     if any(k in txt for k in ("drill", "bore", "ream", "reamer", "tapping", "tap")):
@@ -46,6 +48,7 @@ def parse_txt_plan(text: str) -> List[Dict]:
             "step": step_title,
             "strategy": _strategy(step_title, op_line)   # <── passa anche op_line
         }
+
         patt = {
             "tool_id": r"Tool.*ID:\s*(\d+)",
             "tool_dia": r"D\s*=\s*(\d+\.?\d*)\s*mm",
@@ -54,6 +57,17 @@ def parse_txt_plan(text: str) -> List[Dict]:
             "ap":       r"Depth/Pass.*?:\s*(\d+\.?\d*)\s*mm",
             "ae":       r"Side Engagement.*?:\s*(\d+\.?\d*)\s*mm",
         }
+  
+  #      patt = {
+  #          "tool_id": r"Tool.*?ID\s*:?\s*([\d]+)",
+  #          "tool_dia": r"D\s*=\s*([\d\.]+)\s*mm",
+  #          "n":  r"Spindle\s*Speed\s*(?:\(\s*n\s*\))?\s*\*?:?\s*\**\s*([\d]+)\s*RPM",
+  #          "vf": r"Feedrate\s*(?:\(\s*Vf\s*\))?\s*\*?:?\s*\**\s*([\d]+)\s*mm/min",
+  #          "ap": r"(?:Depth/Pass|Depth\s*per\s*Pass)\s*(?:\(\s*ap\s*\))?"
+  #            r"\s*\*?:?\s*\**\s*([\d\.]+)\s*mm",
+  #          "ae": r"Side\s*Engagement\s*(?:\(\s*ae\s*\))?\s*\*?:?\s*\**\s*([\d\.]+)\s*mm",
+  #      }
+
         for k, pat in patt.items():
             m = re.search(pat, blk, re.I)
             if m:
@@ -61,7 +75,7 @@ def parse_txt_plan(text: str) -> List[Dict]:
         if "tool_id" in step:
             steps.append(step)
             
-        print(f"[DEBUG] Parsed {len(steps)} steps.") # debug - comment this line if not needed
+        # print(f"[DEBUG] Parsed {len(steps)} steps.") # debug - comment this line if not needed
 
     return steps
 

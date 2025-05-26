@@ -1,0 +1,61 @@
+## Process Plan
+
+### Setup
+- **Material**: Titanium
+- **Fixture**: 5-axis vise for secure multi-axis operations
+
+### Operations
+
+1. **Roughing the Outer Profile**
+   - **Tool**: Roughing Endmill D=16 mm (Tool ID: 22)
+   - **Operation**: Adaptive Clearing
+   - **Spindle Speed (n)**: 2500 RPM
+   - **Feedrate (Vf)**: 5000 mm/min
+   - **Depth/Pass (ap)**: 10 mm
+   - **Side Engagement (ae)**: 3.2 mm
+   - **Coolant**: On
+   - **Notes**: Maintain consistent chip load for heat management.
+
+2. **Finishing the Outer Profile**
+   - **Tool**: Endmill D=8 mm (Tool ID: 5)
+   - **Operation**: Contour Finish
+   - **Spindle Speed (n)**: 3500 RPM
+   - **Feedrate (Vf)**: 1200 mm/min
+   - **Depth/Pass (ap)**: 2.4 mm
+   - **Side Engagement (ae)**: 0.8 mm
+   - **Coolant**: On
+   - **Notes**: Verify surface finish with inspection.
+
+3. **Bore Machining**
+   - **Tool**: Drill D=16 mm (Tool ID: 29)
+   - **Operation**: Boring
+   - **Spindle Speed (n)**: 1200 RPM
+   - **Feedrate (Vf)**: 200 mm/min
+   - **Depth/Pass (ap)**: Through Hole
+   - **Coolant**: On
+   - **Notes**: Ensure accurate alignment to avoid deflection.
+
+4. **Tooth Profile Roughing**
+   - **Tool**: Ballmill D=10 mm (Tool ID: 17)
+   - **Operation**: Trochoidal Milling
+   - **Spindle Speed (n)**: 3000 RPM
+   - **Feedrate (Vf)**: 800 mm/min
+   - **Depth/Pass (ap)**: 1 mm
+   - **Side Engagement (ae)**: 1.5 mm
+   - **Coolant**: On
+   - **Notes**: Monitor tool wear.
+
+5. **Tooth Profile Finishing**
+   - **Tool**: Ballmill D=5 mm (Tool ID: 15)
+   - **Operation**: Finishing Pass
+   - **Spindle Speed (n)**: 4000 RPM
+   - **Feedrate (Vf)**: 600 mm/min
+   - **Depth/Pass (ap)**: 0.5 mm
+   - **Side Engagement (ae)**: 0.5 mm
+   - **Coolant**: On
+   - **Notes**: Check for dimensional accuracy.
+
+### Notes
+- Ensure collision avoidance by simulating all 5-axis operations.
+- Maintain within tolerance levels of ±0.05 mm for functional surfaces.
+- Assess tool wear frequently to ensure quality surface finish and precision.

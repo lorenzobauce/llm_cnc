@@ -30,7 +30,10 @@ _RANGE = re.compile(r"([\d\.]+)\s*[–-]\s*([\d\.]+)")  # e.g. 180 – 250
 
 def _rng(s: str) -> Tuple[float, float]:
     m = _RANGE.search(s)
-    return (float(m.group(1)), float(m.group(2))) if m else (0.0, 0.0)
+    if m:                       
+        return float(m.group(1)), float(m.group(2))
+    single = re.search(r"([\d\.]+)", s)
+    return (v:=float(single.group(1))), v 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1 . Cutting‑speed Vc table (§1)
