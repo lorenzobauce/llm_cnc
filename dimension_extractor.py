@@ -46,7 +46,7 @@ def extract_geometry(image_data_url: str) -> Dict:
     llm_raw = call_llm_with_system(
         _DIM_PROMPT,
         image_data_url,
-        system_message="You are a mechanical engineer who reads techical drawings."
+        system_message="You are a mechanical engineer who reads technical drawings."
     )
     match = re.search(r"\{.*?\}", llm_raw, re.S)
     llm_geo = json.loads(match.group() if match else "{}")

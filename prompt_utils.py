@@ -90,12 +90,12 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     Take into account providing both roughing and finishing operations if applicable or required.
     Each operation must be in the format:
     1. **Step name**
-        - **Tool**: Endmill D=25 mm (Tool ID: 12)
-        - **Operation**: Adaptive Clearing
-        - **Spindle Speed (n)**: 6000 RPM
-        - **Feedrate (Vf)**: 2500 mm/min
-        - **Depth/Pass (ap)**: 5 mm
-        - **Side Engagement (ae)**: 12 mm
+        - **Tool**: Endmill D=16 mm (Tool ID: 9)
+        - **Strategy**: Trochoidal (Slot) Milling
+        - **Spindle Speed (n)**: 5000 RPM
+        - **Feedrate (Vf)**: 1500 mm/min
+        - **Depth/Pass (ap)**: 10 mm
+        - **Side Engagement (ae)**: 2 mm
         - **Coolant**: On
         - **Notes**: (Optional)
 
