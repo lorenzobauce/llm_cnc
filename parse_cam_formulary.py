@@ -18,6 +18,7 @@ import re
 from pathlib import Path
 from typing import Dict, Tuple
 
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 0 . Load formulary
 # ─────────────────────────────────────────────────────────────────────────────
@@ -35,32 +36,50 @@ def _rng(s: str) -> Tuple[float, float]:
     single = re.search(r"([\d\.]+)", s)
     return (v:=float(single.group(1))), v 
 
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 1 . Cutting‑speed Vc table (§1)
+# 1a. Cutting‑speed Vc table (§1a)
 # ─────────────────────────────────────────────────────────────────────────────
 _VC: Dict[str, Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 1. Cutting Speed"):
+    if ln.startswith("# 1a. Cutting Speed"):
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 1"):
+    if sec and ln.startswith("# ") and not ln.startswith("# 1a"):
         break
     if sec and "|" in ln and ln.strip()[0] in "PMKNSH":
         iso = ln.strip()[0]
         _VC[iso] = _rng(ln)
 
+
+# ─────────────────────────────────────────────
+# 1b. Drilling cutting-speed Vc (§1b)
+# ─────────────────────────────────────────────
+_VC_DRILL: Dict[str, Tuple[float, float]] = {}
+sec = False
+for ln in _lines:
+    if ln.startswith("# 1b. Drilling"):
+        sec = True
+        continue
+    if sec and ln.startswith("# ") and not ln.startswith("# 1b"):
+        break          # uscita a fine blocco
+    if sec and "->" in ln and ln.strip()[0] in "PMKNSH":     # include anche N,S
+        iso = ln.strip()[0]
+        _VC_DRILL[iso] = _rng(ln)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 2 . Feed‑per‑tooth fz table (§2)
+# 2a. Feed‑per‑tooth fz table (§2a)
 # ─────────────────────────────────────────────────────────────────────────────
 _FZ_ROUGH: Dict[str, Tuple[float, float]] = {}
 _FZ_FINISH: Dict[str, Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 2. Feed per Tooth"):
+    if ln.startswith("# 2a. Feed per Tooth"):
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 2"):
+    if sec and ln.startswith("# ") and not ln.startswith("# 2a"):
         break
     if sec and "|" in ln and ln.strip()[0] in "PMKNSH":
         iso = ln.strip()[0]
@@ -68,6 +87,26 @@ for ln in _lines:
             _FZ_ROUGH[iso] = _rng(ln)
         else:
             _FZ_FINISH[iso] = _rng(ln)
+
+
+# ─────────────────────────────────────────────
+# 1c. Drilling feed f_n (§2b)
+# ─────────────────────────────────────────────
+_FN_DRILL: Dict[Tuple[str, str], Tuple[float, float]] = {}
+sec = False
+for ln in _lines:
+    if ln.startswith("# 2b. Drilling"):
+        sec = True
+        continue
+    if sec and ln.startswith("# ") and not ln.startswith("# 2b"):
+        break
+    if sec and "->" in ln and ln.strip()[0] in "PMKNSH":
+        # P Ø1-3 -> 0.01–0.03
+        parts = ln.split("->")
+        lhs, rhs = parts[0].strip(), parts[1].strip()
+        iso, bucket = lhs.split(maxsplit=1)         # e.g. "P Ø1-3"
+        _FN_DRILL[(iso, bucket)] = _rng(rhs)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3 . Engagement ratios table (§3)
@@ -87,6 +126,7 @@ for ln in _lines:
 # ensure keys exist to avoid KeyError
 for k in ("roughing", "finishing", "slotting"):
     _ENG.setdefault(k, {"ap_d": (0, 0), "ae_d": (0, 0)})
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 4 . Cutting‑pressure constants kc0_4 + exponent x (§9)
@@ -112,6 +152,7 @@ for ln in _lines:
         iso = ln.strip()[0]
         _X[iso] = _rng(ln)
 
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 5 . Public helpers
 # ─────────────────────────────────────────────────────────────────────────────
@@ -133,19 +174,45 @@ def infer_material_tag(text: str) -> str:
     return "P"
 
 
-def get_limits_for(material: str | None) -> Dict:
+def get_limits_for(material: str | None,
+                   operation: str = "milling",
+                   drill_diam: float | None = None) -> Dict:
     iso = (material or "P").upper()[0]
+
+    vc_tbl  = _VC if operation != "drilling" else _VC_DRILL
+    # milling: feed per tooth; drilling: feed per rev
+    if operation == "drilling":
+        # trova il bucket Ø corretto
+        if drill_diam is None:
+            bucket = "Ø4-7"               # default sensato
+        elif drill_diam <= 3:
+            bucket = "Ø1-3"
+        elif drill_diam <= 7:
+            bucket = "Ø4-7"
+        elif drill_diam <= 13:
+            bucket = "Ø8-13"
+        else:
+            bucket = "Ø14-20"
+        fn_lim = _FN_DRILL.get((iso, bucket), (0, 0))
+        fz_lim = (0, 0)                   # non rilevante
+    else:
+        fz_lim = _FZ_ROUGH.get(iso, (0, 0))
+        fn_lim = (0, 0)
+
     return {
-        "Vc": _VC.get(iso, (0, 0)),
-        "fz_rough": _FZ_ROUGH.get(iso, (0, 0)),
+        "Vc":        vc_tbl.get(iso, (0, 0)),
+        "fz_rough":  fz_lim,
         "fz_finish": _FZ_FINISH.get(iso, (0, 0)),
-        "kc0_4": _KC.get(iso, (0, 0)),
-        "x": _X.get(iso, (0, 0)),
+        "f_n":       fn_lim,
+        "kc0_4":     _KC.get(iso, (0, 0)),
+        "x":         _X.get(iso, (0, 0)),
     }
+
 
 
 def get_engagement_limits(strategy: str = "roughing") -> Dict[str, Tuple[float, float]]:
     return _ENG.get(strategy.lower(), _ENG["roughing"])
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 6 . Smoke test (optional)

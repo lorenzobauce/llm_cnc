@@ -57,10 +57,10 @@ def summary_text(geo: Dict) -> str:
     """Nicely formatted multiline summary for the CAM prompt."""
     return (
         f"Pulley outer diameter: {geo.get('outer_diameter_mm', '?')} mm\n"
-        f"Pitch diameter:       {geo.get('pitch_diameter_mm', '?')} mm\n"
-        f"Bore diameter:        {geo.get('bore_diameter_mm',  '?')} mm\n"
-        f"Total width:          {geo.get('total_width_mm',    '?')} mm\n"
-        f"Belt width:           {geo.get('belt_width_mm',     '?')} mm\n"
-        f"Tooth pitch:          {geo.get('tooth_pitch_mm',    '?')} mm\n"
-        f"Number of teeth:      {geo.get('num_teeth',         '?')}"
+        f"Pitch diameter:        {geo.get('pitch_diameter_mm', '?')} mm\n"
+        f"Bore diameter:         {geo.get('bore_diameter_mm',  '?')} mm\n"
+        f"Total width:           {geo.get('total_width_mm',    '?')} mm\n"
+        f"Belt width:            {geo.get('belt_width_mm',     '?')} mm\n"
+        f"Tooth pitch:           {geo.get('tooth_pitch_mm',    '?')} mm\n"
+        f"Number of teeth:       {geo.get('num_teeth',         '?')}"
     )

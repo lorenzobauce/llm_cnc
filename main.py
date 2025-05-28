@@ -42,7 +42,7 @@ print("\n--- Geometry ---\n" + summary_text(geo) + "\n")
 user_prompt   = input("❓ Describe what you want to machine / ask CAM assistant: ")
 material_desc = input("❓ Material description: ")
 text_desc = (
-    user_prompt
+    "User prompt: " + user_prompt
     + "\nMaterial description: " + material_desc
     + "\nGeometry description: " + summary_text(geo)
 )
