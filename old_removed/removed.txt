@@ -1,0 +1,48 @@
+# From cam_optimizer
+machine_block = textwrap.dedent(f"""
+    ### CNC Machine Specifications
+    Name: {machine.get('name','')}
+    Axes: {machine.get('axes','')}
+    Max X axis stroke: {machine.get('max_X_axis_stroke','?')} mm
+    Max Y axis stroke: {machine.get('max_Y_axis_stroke','?')} mm
+    Max Z axis stroke: {machine.get('max_Z_axis_stroke','?')} mm
+    Min A axis swivel angle: {machine.get('A_axis_min_swivel_angle','?')} ° (if applicable)
+    Max A axis swivel angle: {machine.get('A_axis_max_swivel_angle','?')} ° (if applicable)
+    Min B axis swivel angle: {machine.get('B_axis_min_swivel_angle','?')} ° (if applicable)
+    Max B axis swivel angle: {machine.get('B_axis_max_swivel_angle','?')} ° (if applicable)
+    Raneg C axis swivel angle: {machine.get('C_axis_swivel_angle','?')} ° (if applicable)
+    Max workpiece diameter: {machine.get('max_workpiece_diameter','?')} mm
+    Max workpiece height: {machine.get('max_workpiece_height','?')} mm
+    Max workpiece weight: {machine.get('max_workpiece_weight','?')} kg
+    Max spindle RPM: {machine.get('max_spindle_rpm','?')} rpm
+    Max feed rate: {machine.get('max_feed_rate','?')} mm/min
+    Max spindle power: {machine.get('spindle_power', '?')} kW
+    Max spindle torque: {machine.get('spindle_torque', '?')} N·m
+    Tool change type: {machine.get('tool_change_type','?')}
+    Storage capacity {machine.get('tool_storage_capacity','?')} tools
+    """).strip()
+
+
+
+
+
+
+
+   for st in steps:
+
+
+
+        if not ok:
+            issues_out.append(f"Step “{st['step']}”: " + ", ".join(err))
+            # Always try to get suggestions if not present
+            if not sug and callable(sugg_fn):
+                tool_obj = next((t for t in tools if t.get("id") == st.get("tool_id")), {})
+                sug = sugg_fn(st, machine, tag, tool_obj)
+            # Append suggestions if available
+            if sug:
+                fix_out.append(
+                    f"{st['step']} → tool_id={sug.get('tool_id', st.get('tool_id', '?'))} | "
+                    f"n={sug.get('n','?')} | Vf={sug.get('vf','?')} | "
+                    f"ap={sug.get('ap','?')} | ae={sug.get('ae','?')}"
+                )
+    return issues_out, fix_out

@@ -289,18 +289,12 @@ def validate_step(
         issues.append(
             f"Vc {calc['Vc']:.0f} m/min outside [{Vc_lo:.0f},{Vc_hi:.0f}]±{TOL_PCT*100:.0f}%"
         ); ok = False
-    
-    # engagement ratios (skip for drilling, ballmills, face-mills *or* face-milling ops)
+
+    # engagement ratios (skip for drilling, ballmills, face mills)
     ttype = tool.get("type", "").lower()
-    is_face_tool = "facemill" in ttype or "face mill" in ttype
-    is_face_op   = "face" in step.get("step", "").lower()   # e.g. \"Face Milling\"
-    skip_ae = (
-        strat == "drilling"
-        or ttype == "ballmill"
-        or is_face_tool
-        or is_face_op
-    )
-    
+    is_face = "facemill" in ttype or "face mill" in ttype
+    skip_ae = strat == "drilling" or ttype == "ballmill" or is_face
+
     if calc["D"] and not skip_ae:
         eng = cam.get_engagement_limits(strat)
         apR = step.get("ap", 0) / calc["D"]

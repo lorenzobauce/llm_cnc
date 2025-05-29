@@ -6,8 +6,11 @@ from openai import OpenAI
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+MODEL = "gpt-4o" 
+#MODEL = "gpt-4o-mini"
 
-def call_llm(prompt: str, image_data_url: str, model: str = "gpt-4o-mini") -> str:
+
+def call_llm(prompt: str, image_data_url: str, model: str = MODEL) -> str:
     messages = [
         {
             "role": "user",
@@ -21,7 +24,7 @@ def call_llm(prompt: str, image_data_url: str, model: str = "gpt-4o-mini") -> st
     return resp.choices[0].message.content
 
 
-def call_llm_with_system(prompt: str, image_data_url: str, system_message: str, model: str = "gpt-4o") -> str:
+def call_llm_with_system(prompt: str, image_data_url: str, system_message: str, model: str = MODEL) -> str:
     """
     Send a prompt + image + system message to the vision model.
     Keeps `call_llm()` unchanged for other uses.

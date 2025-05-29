@@ -15,7 +15,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-4o" 
+#MODEL = "gpt-4o-mini"
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _read(p: str) -> str:
@@ -90,32 +91,38 @@ def optimise_plan(
 
         # Build LLM prompt ------------------------------------------------        
         prompt = textwrap.dedent(f"""
-            ## Below is the current process plan for the part imported as image with detected issues.
-            **Please regenerate the entire process plan, keeping the same numbering, headings, and all the fields that are existing.**
-            **Substitute only the corrected parameters (n, Vf, ap, ae) that are suggested.**
-                                 
-            ## Part description / user goal
-            {description}
-            
-            ## Current manufacturing plan (with detected issues below)
-            {plan_txt}
+        ## Below is the current process plan for the part imported as image with detected issues.
+        **Please regenerate the entire process plan, keeping the same numbering, headings, and all the fields that are existing.**
+        **Substitute only the corrected parameters (n, Vf, ap, ae) that are suggested.**
 
-            ## Detected issues
-            {chr(10).join(issues)}
+                                
+        ## Part description / user goal
+        {description}
 
-            ## Suggested fixes
-            **Please substitute the detected wrong parameters in the process plan using the values inside the ranges expressed above**
-            {chr(10).join(fixes)}
+        ## Current manufacturing plan (with detected issues below)
+        {plan_txt}
 
-            ## Formula block
-            {_FORMULA_BLOCK}
+        ## Detected issues
+        {chr(10).join(issues)}
 
-            ## Contextual information
-            {context_block}
+        ## Suggested fixes
+        **Please substitute the detected wrong parameters in the process plan using the values inside the ranges expressed above**
+        {chr(10).join(fixes)}
 
-            ### CNC Machine Specifications
-            {machine_block}
+        ## Formula block
+        {_FORMULA_BLOCK}
+
+        ## Contextual information
+        {context_block}
+
+        ### CNC Machine Specifications
+        {machine_block}
         """)
+
+
+        # DEBUG: print the prompt to LLM
+        print("\n--- DEBUG: PROMPT TO LLM ---\n")
+        print(prompt)
 
 
         # Call LLM ---------------------------------------------------------
