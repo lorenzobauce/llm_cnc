@@ -88,7 +88,7 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     # Operations
     If multiple operations are required, number them sequentially (1, 2, 3, ...).
     Take into account providing both roughing and finishing operations if applicable or required.
-    Each operation must be in the following format with all fields filled and with numerical values where applicable:
+    Each operation must be *EXACTLY* in the following format with all fields filled and with numerical values where applicable:
     1. **Step name**
         - **Tool**: Endmill D=16 mm (Tool ID: 9)
         - **Strategy**: Trochoidal (Slot) Milling

@@ -1,13 +1,9 @@
-**Computer Aided Manufacturing**
-────────────────────────────────────────────────────────────────────────────
-
-
-────────────────────────────────────────────────────────────────────────────
 **Basic Equations**
 
 ────────────────────────────────────────────────────────────────────────────
 *Milling*
 ────────────────────────────────────────────────────────────────────────────
+n                                            -> Spindle speed [rev/min]
 a_e                                          -> Radial depth of cut [mm]
 a_p                                          -> Axial depth of cut [mm]
 z                                            -> Number of teeth in cut
@@ -35,6 +31,10 @@ h_av = (2 · f_z · a_e · sin(k_re)) / (φ · D) -> Average chip thickness [mm]
 A_av = (2 · f_z · a_e · a_p) / (φ · D)       -> Average chip area [mm^2]
 
 *Cutting Force and Power*
+k_{cs}= k_{c0,4} · 0.4^x                     -> Specific Cutting Pressure [MPa]
+k_c   = k_{cs} / h_D^{x}                     -> Cutting Pressure [MPa]
+F_c   = k_c · A_D                            -> Cutting Force [N]
+P_c   = F_c · v_c                            -> Cutting Power [W]
 F_{c(θ)} = k_{c,θ} · A_{D,θ}                 -> Cutting force [N]
 F_{c,av} = k_{c,av} · A_{D,av} = k_{cs} · h_{D,av}^(1-x) · a_p  -> Average cutting force [N]
 T_c   = Σ_{i=1}^z (F_{c(θ_i)} · D / 2)       -> Cutting torque [Nm]
@@ -46,33 +46,6 @@ P_c   = v_c · F_c / 60                       -> Cutting power (alternative) [W]
 MRR   = a_e · a_p · v_f                      -> Material Removal Rate [mm^3/min]
 t_c   = l_c / v_f = V / MRR                  -> Cutting time [min]
 t_m   = l_m / v_f                            -> Machining time [min]
-
-
-────────────────────────────────────────────────────────────────────────────
-*Turning*
-────────────────────────────────────────────────────────────────────────────
-n                                        -> Spindle speed [rev/min]
-D_m                                      -> Machined diameter [mm]
-f_n                                      -> Feed per revolution [mm/rev]
-a_p                                      -> Axial depth of cut [mm]
-h_m                                      -> Average chip thickness [mm]
-l_m                                      -> Machined length [mm]
-v_c   = π · D_m · n / 1000               -> Cutting speed [m/min]
-v_f   = f_n · n                          -> Feed velocity [mm/min]
-h_D   = f_n · sin(kr)                    -> Chip thickness [mm]
-MRR   = A_D · v_c = a_p · f_n · v_c      -> Material Removal Rate [mm^3/min]
-k_{cs}= k_{c0,4} · 0.4^x                 -> Specific Cutting Pressure [MPa]
-k_c   = k_{cs} / h_D^{x}                 -> Cutting Pressure [MPa]
-F_c   = k_c · A_D                        -> Cutting Force [N]
-P_c   = F_c · v_c                        -> Cutting Power [W]
-t_c   = l_c / v_f = V / MRR              -> Cutting Time [min]
-t_m   = l_m / v_f                        -> Machining Time [min]
-T_c   = F_c · D_m / 2                    -> Cutting Torque [Nm]
-T_r   = z · μ · p · A · D_r / 2          -> Resistant Torque (3-jaws chuck) [Nm]
-J     = π · D_m^4 / 32                   -> Moment of Inertia [mm^4]
-d     = 1/3   · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 1: Three jaws self-centering chuck
-d     = 1/107 · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 2: Self-centering chuck – Dead center
-d     = 1/48  · (F_c · L^3) / (E · J)    -> Workpiece Bending - Case 3: Between centers
 
 
 ────────────────────────────────────────────────────────────────────────────
@@ -142,7 +115,7 @@ ISO Material Class      | Tool Type                             | Typical Vc [m/
 P (Steel)               | Hyb. AlCrN or AlTiN coated carbide    | 100 – 150
 M (Stainless steel)     | Hyb. AlCrN or AlTiN coated carbide    | 90 – 120
 K (Cast iron)           | Hyb. AlCrN or AlTiN coated carbide    | 100 – 150
-N (Aluminium alloys)    | Uncoated carbide                      | 180 – 250
+N (Aluminium alloys)    | Uncoated carbide or TiAlN             | 180 – 250
 S (Superalloys, Ti)     | AlTiN or Hyb. AlCrN coated carbide    | 40 – 90
 H (Hardened steel>50HRC)| Hyb. AlCrN coated carbide             | 50 – 90
 
@@ -219,7 +192,60 @@ Slotting     | 0.5 – 1.0 × D       | 1.0 × D (full slot)
 
 
 ────────────────────────────────────────────────────────────────────────────
-# 4. Tool-Life Optimisation
+# 4. Roughing Strategies (Milling)
+────────────────────────────────────────────────────────────────────────────
+- Adaptive / High-Efficiency Roughing  
+  - Use high axial depth (ap ≈ 80–100 % of flute length) and low radial width (ae ≈ 8–15 % D) to maintain constant chip load and lower heat.  
+  - Choose CAM toolpaths such as Adaptive Clearing or Dynamic Mill; feed rate can be 1.2–1.5 × the traditional value.  
+  - Optimize toolpaths, using curved and trochoidal-like toolpaths that avoid sharp corners and abrupt direction changes.
+  
+- Trochoidal (Slot / Contour) Milling 
+  - Spiral motion composed of circular milling that includes simultaneous forward movements, keeps radial engagement constant → cooler cut; ideal for hardened steels and super-alloys.  
+  - The controlled arc of engagement generates low cutting forces, which enable high axial depths of cut 
+  - Suitable for rough milling of confined cavities, pockets and grooves.
+  - Allows ~30 % higher cutting speed (Vc) than conventional slotting and often doubles tool life.  
+  - The maximum radial depth of cut (ae) should not exceed ~20% of the cutter diameter.
+  - Cutting parameters: Cutter diameter max: D_c = 70% slot width
+                        Step over max: w = 10% D_c
+                        Radial cut max: ae = 20% D_c
+                        Axial cut: a_p = up to 2 x D_c
+                        Start feed per tooth: fz = 0.1 mm
+
+
+────────────────────────────────────────────────────────────────────────────
+# 5. Feature-Machining Guidelines
+────────────────────────────────────────────────────────────────────────────
+Feature           | Recommended Tool             | Notes
+------------------|------------------------------|-----------------------------------------------
+Rectangular pocket| End mill D ≈ 60% pocket width| Adaptive roughing followed by finishing with trochoidal milling strategy
+Hole (D ≤ 12 mm)  | Carbide twist drill          | Use pecking if L/D > 3
+Hole (D > 12 mm)  | Helical interpolation        | Better chip evacuation and low torque required
+Large face        | Endmill with large diameter  | Use a_e ≥ 75% D, and a_p ≤ 2 mm
+Contouring        | Endmill                      | Use high a_p and low constant a_e
+
+
+────────────────────────────────────────────────────────────────────────────
+# 6. Number of flutes for carbide End-Mills
+────────────────────────────────────────────────────────────────────────────
+ - 2-flute: Recommended for non-ferrous materials. They are suitable to accomodate the larger chips produced by high f_z on softer materials.
+ - 3-flute: Recommended for non-ferrous materials. Fewer flutes allow for excellent chip clearance on larger chips, and deeper cut depths. Ideal for aluminum in heavy roughing and finishing applications.
+ - 4-flute: Recommended for ferrous materials. The low flute count allows for excellent chip clearance for general purpose roughing and slotting. Ideal for steel, stainless, and cast iron. 
+ - 5-flute: Recommended for ferrous materials. Higher flute count increases the tool strength, but reduces the cut depths. Ideal for finishing or high-efficiency milling in steel, stainless, cast iron, and harder materials.
+ - 6-flute: Recommended for ferrous materials. High flute count yields a thicker core for greater tool strength and less deflection, while increasing material removal rates. Ideal for high-efficiency/high-speed milling in steel, stainless, cast iron, and high-temp alloys. 
+
+
+────────────────────────────────────────────────────────────────────────────
+# 7. Effective Cutting Diameter for Ball-End Milling 
+────────────────────────────────────────────────────────────────────────────
+For full-radius ball end mills the effective cutting diameter D_cap is smaller than the nominal cutter diameter D_c and depends on the axial depth of cut a_p and the tilt angle theta of the tool.
+- Tool in line with the surface (theta = 0 deg): D_cap = 2 * sqrt( a_p * ( D_c - a_p ) )
+- Tool tilted by an angle theta (typ. 10–15 deg): D_cap = D_c * sin( theta + acos( 1 - 2 * a_p / D_c ) )
+- Always use D_cap (not D_c) in the cutting-speed formula: v_c = pi * D_cap * n / 1000
+- When D_cap changes, spindle speed n must be adjusted to keep v_c  constant.
+
+
+────────────────────────────────────────────────────────────────────────────
+# 8. Tool-Life Optimisation
 ────────────────────────────────────────────────────────────────────────────
 1. Reduce Vc by ~10% when crater wear or rounding is observed.
 2. Maintain consistent f_z; increasing rpm instead of feed rate increases heat.
@@ -233,18 +259,7 @@ Slotting     | 0.5 – 1.0 × D       | 1.0 × D (full slot)
 
 
 ────────────────────────────────────────────────────────────────────────────
-# 5. Feature-Machining Guidelines
-────────────────────────────────────────────────────────────────────────────
-Feature           | Recommended Tool             | Notes
-------------------|------------------------------|-----------------------------------------------
-Rectangular pocket| End mill D ≈ 60% pocket width| Adaptive roughing followed by finishing
-Hole (D ≤ 12 mm)  | Carbide twist drill 2×D–3×D  | Use pecking if L/D > 3
-Hole (D > 12 mm)  | Helical interpolation        | Better chip evacuation and low torque required
-Large face        | Face mill D = 50–80 mm       | Use a_e ≥ 75% D, and a_p ≤ 2 mm
-
-
-────────────────────────────────────────────────────────────────────────────
-# 6. Surface-Finish Targets
+# 9. Surface-Finish Targets
 ────────────────────────────────────────────────────────────────────────────
 | Strategy      | Typical Ra (µm) |
 |---------------|-----------------|
@@ -254,7 +269,7 @@ Large face        | Face mill D = 50–80 mm       | Use a_e ≥ 75% D, and a_p 
 
 
 ────────────────────────────────────────────────────────────────────────────
-# 7. Typical values to compute the cutting pressure depending on the target material 
+# 10. Typical values to compute the cutting pressure depending on the target material 
 ────────────────────────────────────────────────────────────────────────────
 Reference formula to compute the specific cutting pressure: k_{cs}= k_{c0,4} · 0.4^x
 
@@ -277,46 +292,3 @@ N (aluminum)              -> 0.10 – 0.20
 S (superalloys, titanium) -> 0.35 – 0.45
 H (hardened steel)        -> 0.25 – 0.30
 Default for carbon steels -> x ≈ 0.2
-
-
-────────────────────────────────────────────────────────────────────────────
-# 8. Number of flutes for carbide End-Mills
-────────────────────────────────────────────────────────────────────────────
- - 2-flute: Recommended for non-ferrous materials. They are suitable to accomodate the larger chips produced by high f_z on softer materials.
- - 3-flute: Recommended for non-ferrous materials. Fewer flutes allow for excellent chip clearance on larger chips, and deeper cut depths. Ideal for aluminum in heavy roughing and finishing applications.
- - 4-flute: Recommended for ferrous materials. The low flute count allows for excellent chip clearance for general purpose roughing and slotting. Ideal for steel, stainless, and cast iron. 
- - 5-flute: Recommended for ferrous materials. Higher flute count increases the tool strength, but reduces the cut depths. Ideal for finishing or high-efficiency milling in steel, stainless, cast iron, and harder materials.
- - 6-flute: Recommended for ferrous materials. High flute count yields a thicker core for greater tool strength and less deflection, while increasing material removal rates. Ideal for high-efficiency/high-speed milling in steel, stainless, cast iron, and high-temp alloys. 
-
-
-────────────────────────────────────────────────────────────────────────────
-# 9. Effective Cutting Diameter for Ball-End Milling 
-────────────────────────────────────────────────────────────────────────────
-For full-radius ball end mills the effective cutting diameter D_cap is smaller than the nominal cutter diameter D_c and depends on the axial depth of cut a_p and the tilt angle theta of the tool.
-- Tool in line with the surface (theta = 0 deg): D_cap = 2 * sqrt( a_p * ( D_c - a_p ) )
-- Tool tilted by an angle theta (typ. 10–15 deg): D_cap = D_c * sin( theta + acos( 1 - 2 * a_p / D_c ) )
-- Always use D_cap (not D_c) in the cutting-speed formula: v_c = pi * D_cap * n / 1000
-- When D_cap changes, spindle speed n must be adjusted to keep v_c  constant.
-
-
-
-
-────────────────────────────────────────────────────────────────────────────
-## Roughing Strategies (Milling)
-────────────────────────────────────────────────────────────────────────────
-- Adaptive / High-Efficiency Roughing  
-  - Use high axial depth (ap ≈ 80–100 % of flute length) and low radial width (ae ≈ 8–15 % D) to maintain constant chip load and lower heat.  
-  - Choose CAM toolpaths such as Adaptive Clearing or Dynamic Mill; feed rate can be 1.2–1.5 × the traditional value.  
-  - Optimize toolpaths, using curved and trochoidal-like toolpaths that avoid sharp corners and abrupt direction changes.
-  
-- Trochoidal (Slot / Contour) Milling 
-  - Spiral motion composed of circular milling that includes simultaneous forward movements, keeps radial engagement constant → cooler cut; ideal for hardened steels and super-alloys.  
-  - The controlled arc of engagement generates low cutting forces, which enable high axial depths of cut 
-  - Suitable for rough milling of confined cavities, pockets and grooves.
-  - Allows ~30 % higher cutting speed (Vc) than conventional slotting and often doubles tool life.  
-  - The maximum radial depth of cut (ae) should not exceed ~20% of the cutter diameter.
-  - Cutting parameters: Cutter diameter max: D_c = 70% slot width
-                        Step over max: w = 10% D_c
-                        Radial cut max: ae = 20% D_c
-                        Axial cut: a_p = up to 2 x D_c
-                        Start feed per tooth: fz = 0.1 mm

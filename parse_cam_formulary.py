@@ -95,17 +95,24 @@ for ln in _lines:
 _FN_DRILL: Dict[Tuple[str, str], Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 2b. Drilling"):
+    if ln.startswith("# 2b."):          # start of pipe-table block
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 2b"):
-        break
-    if sec and "->" in ln and ln.strip()[0] in "PMKNSH":
-        # P Ø1-3 -> 0.01–0.03
-        parts = ln.split("->")
-        lhs, rhs = parts[0].strip(), parts[1].strip()
-        iso, bucket = lhs.split(maxsplit=1)         # e.g. "P Ø1-3"
-        _FN_DRILL[(iso, bucket)] = _rng(rhs)
+    if sec and ln.startswith("# ") and not ln.startswith("# 2b."):
+        break                            # next rubric → end-of-block
+
+    if not sec or "│" in ln:             # skip pretty-printing lines
+        continue
+
+    if "|" in ln and ln.count("|") >= 2:
+        # split markdown table row
+        col = [c.strip() for c in ln.split("|")]
+        if len(col) < 3 or col[0][:1] not in "PMKNSH":      # not data
+            continue
+        iso  = col[0][0].upper()                            # 'P'
+        bucket = col[1].replace("–", "-").replace(" ", "")  # '1-3'
+        rng  = _rng(col[2])                                 # (lo, hi)
+        _FN_DRILL[(iso, bucket)] = rng
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -184,15 +191,15 @@ def get_limits_for(material: str | None,
     if operation == "drilling":
         # trova il bucket Ø corretto
         if drill_diam is None:
-            bucket = "Ø4-7"               # default sensato
+            bucket = "4-7"               # default sensato
         elif drill_diam <= 3:
-            bucket = "Ø1-3"
+            bucket = "1-3"
         elif drill_diam <= 7:
-            bucket = "Ø4-7"
+            bucket = "4-7"
         elif drill_diam <= 13:
-            bucket = "Ø8-13"
+            bucket = "8-13"
         else:
-            bucket = "Ø14-20"
+            bucket = "14-20"
         fn_lim = _FN_DRILL.get((iso, bucket), (0, 0))
         fz_lim = (0, 0)                   # non rilevante
     else:

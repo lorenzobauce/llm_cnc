@@ -50,12 +50,12 @@ _NUM = re.compile(r"([\d\.]+)")
 # ────────────────────────────────────────────────────────────────────────────
 
 _COATING_REQ = {
-    "P": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn", "tiain"],
-    "M": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn", "tiain"],
-    "K": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn", "tiain"],
-    "N": ["uncoated"],  # aluminium alloys
-    "S": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn", "tiain"],
-    "H": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn", "tiain"],
+    "P": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn"],
+    "M": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn"],
+    "K": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn"],
+    "N": ["uncoated", "tialn"],
+    "S": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn"],
+    "H": ["alcrn", "hyb. alcrn", "altin", "hyb. altin", "tialn"],
 }
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -83,7 +83,7 @@ def _strategy(text: str, op_line: str = "") -> str:
         )
     ):
         return "finishing"
-    if any(k in txt for k in ("drill", "bore", "ream", "tapping", "tap")):
+    if any(k in txt for k in ("drill", "drilling", "bore", "boring", "ream", "reaming", "tapping", "tap")):
         return "drilling"
     if any(
         k in txt
@@ -149,16 +149,10 @@ def _calc_values(step: Dict, tool: Dict) -> Dict[str, float]:
 
 
 def _loc_to_mm(loc_val, tool_dia: float) -> float:
-    """Parse LOC specified as number or multiplier like "2xD"."""
+    """Parse LOC specified as a number (mm)."""
     if isinstance(loc_val, (int, float)):
         return float(loc_val)
-    if not isinstance(loc_val, str):
-        return math.inf
-    s, m = loc_val.lower(), _NUM.search(loc_val)
-    if not m:
-        return math.inf
-    num = float(m.group(1))
-    return num * tool_dia if "x" in s and "d" in s else num
+    return math.inf
 
 
 def _out_of_band(value: float, lo: float, hi: float) -> bool:
@@ -218,27 +212,45 @@ def suggest_corrections(step: Dict, machine: Dict, mat_tag: str, tool: Dict) -> 
     ap_tgt = round(ap_ratio * D, 2)
     ae_tgt = round(ae_ratio * D, 2)
 
+    # face-milling: force ap ≤ 2 mm and keep ae as given
+    is_face_op = "face" in step.get("step", "").lower()
+    if is_face_op and step.get("ap", 0) > 2.0:
+        ap_tgt = 2.0
+
     # respect Length Of Cut
     loc_mm = _loc_to_mm(tool.get("loc", math.inf), D)
     if ap_tgt > loc_mm:
         ap_tgt = round(max(loc_mm * 0.8, 0.1), 2)
 
-    return {
+    out = {
         "tool_id": step.get("tool_id"),
         "n": n_tgt,
         "vf": vf_tgt,
-        "ap": ap_tgt,
-        "ae": ae_tgt,
     }
+    if step["strategy"] not in ("drilling", "boring"):
+        out["ap"] = ap_tgt
+        out["ae"] = ae_tgt
+    return out
+
 
 # ────────────────────────────────────────────────────────────────────────────
 # Validation
 # ────────────────────────────────────────────────────────────────────────────
-
 def validate_step(
     step: Dict, machine: Dict, mat_tag: str, tools: List[Dict]
-) -> Tuple[bool, List[str]]:
-    """Validate a machining step and return *(is_ok, issues)*."""
+) -> Tuple[bool, List[str], Dict]:
+    """
+    Validate a machining step.
+
+    Returns
+    -------
+    ok : bool
+        True when every check passes.
+    issues : list[str]
+        Description of each violation.
+    suggestions : dict
+        Concrete corrected parameters {n, vf, ap, ae, tool_id}; empty when *ok*.
+    """
 
     tool = _find_tool(step.get("tool_id"), tools)
     calc = _calc_values(step, tool)
@@ -247,25 +259,29 @@ def validate_step(
     issues: List[str] = []
     ok = True
 
-    # machine capability checks
+    # ── 1) machine capability checks
     if step.get("n", 0) > machine.get("max_spindle_rpm", 9e9):
         issues.append("rpm > machine limit"); ok = False
     if step.get("vf", 0) > machine.get("max_feed_rate", 9e9):
         issues.append("feed > machine limit"); ok = False
 
-    # LOC check
-    loc_mm = _loc_to_mm(tool.get("loc", math.inf), calc["D"])
-    if step.get("ap", 0) > loc_mm:
-        issues.append("ap exceeds tool LOC"); ok = False
+    # ── 2) Length-of-cut check
+    # Make sure 'tool' is defined for the current step
+    tool_id = step.get("tool_id")
+    tool = next((t for t in tools if t.get("id") == tool_id), {})
+    loc_mm = tool.get("loc", 0)
 
-    # material limits
+    if strat not in ("drilling") and step.get("ap", 0) > loc_mm:
+        issues.append("ap exceeds tool LOC"); ok=False
+
+    # ── 3) material + geometry limits (Vc, fz / fn, engagements …)
     lim = cam.get_limits_for(
         mat_tag,
         operation="drilling" if strat == "drilling" else "milling",
         drill_diam=step.get("tool_dia"),
     )
 
-    # feed checks
+    # feed check (operation aware)
     if strat == "drilling":
         fn_lo, fn_hi = lim["f_n"]
         if fn_lo and _out_of_band(calc["fn"], fn_lo, fn_hi):
@@ -279,7 +295,7 @@ def validate_step(
                 f"f_z {calc['fz']:.3f} mm/tooth outside [{fz_lo:.3f},{fz_hi:.3f}]±{TOL_PCT*100:.0f}%"
             ); ok = False
 
-    # Vc check (apply strategy multipliers)
+    # cutting-speed check (with strategy multipliers)
     Vc_lo, Vc_hi = lim["Vc"]
     if strat == "slotting":
         Vc_lo, Vc_hi = Vc_lo * 0.4, Vc_hi * 0.7
@@ -289,46 +305,50 @@ def validate_step(
         issues.append(
             f"Vc {calc['Vc']:.0f} m/min outside [{Vc_lo:.0f},{Vc_hi:.0f}]±{TOL_PCT*100:.0f}%"
         ); ok = False
-    
-    # engagement ratios (skip for drilling, ballmills, face-mills *or* face-milling ops)
+
+    # engagement ratios (skip for drilling, ballmills, face-milling ops)
     ttype = tool.get("type", "").lower()
     is_face_tool = "facemill" in ttype or "face mill" in ttype
-    is_face_op   = "face" in step.get("step", "").lower()   # e.g. \"Face Milling\"
-    skip_ae = (
-        strat == "drilling"
-        or ttype == "ballmill"
-        or is_face_tool
-        or is_face_op
+    is_face_op   = any(
+        k in step.get("step", "").lower() for k in ("face", "facing", "facemill", "face mill")
     )
-    
+    skip_ae = (
+        strat == "drilling" or ttype == "ballmill" or is_face_tool or is_face_op
+    )
+     # face-milling: axial depth must be ≤ 2 mm (absolute) and ae/D already skipped
+    if is_face_op and step.get("ap", 0) > 2.0:
+        issues.append(f"ap {step['ap']} mm exceeds 2 mm limit for facing")
+        ok = False
+
     if calc["D"] and not skip_ae:
         eng = cam.get_engagement_limits(strat)
         apR = step.get("ap", 0) / calc["D"]
         aeR = step.get("ae", 0) / calc["D"]
-        ap_lo, ap_hi = eng["ap_d"]
-        ae_lo, ae_hi = eng["ae_d"]
-        if _out_of_band(apR, ap_lo, ap_hi):
-            issues.append(f"ap/D {apR:.2f} outside [{ap_lo:.2f},{ap_hi:.2f}]")
-        if not (aeR == 1.0 and (strat == "drilling" or is_face)):
-            if _out_of_band(aeR, ae_lo, ae_hi):
-                issues.append(f"ae/D {aeR:.2f} outside [{ae_lo:.2f},{ae_hi:.2f}]")
+        if _out_of_band(apR, *eng["ap_d"]):
+            issues.append(f"ap/D {apR:.2f} outside [{eng['ap_d'][0]:.2f},{eng['ap_d'][1]:.2f}]"); ok = False
+        if not (aeR == 1.0 and strat == "drilling"):
+            if _out_of_band(aeR, *eng["ae_d"]):
+                issues.append(f"ae/D {aeR:.2f} outside [{eng['ae_d'][0]:.2f},{eng['ae_d'][1]:.2f}]"); ok = False
 
-    # coating vs material class
+    # coating vs material class (unchanged)
     coating = tool.get("coating", "").lower()
     reqs = _COATING_REQ.get(mat_tag, [])
     if mat_tag == "N":
         if coating and coating != "uncoated":
-            issues.append("tool coating not suitable for Al alloys")
+            issues.append("tool coating not suitable for Al alloys"); ok = False
     else:
         if reqs and not any(r in coating for r in reqs):
-            issues.append(f"tool coating '{tool.get('coating')}' not suitable for ISO-{mat_tag}")
+            issues.append(f"tool coating '{tool.get('coating')}' not suitable for ISO-{mat_tag}"); ok = False
 
-    # bore diameter sanity when drilling
+    # bore sanity (drilling only)
     if strat == "drilling" and "bore_diameter" in step:
         if calc["D"] > step["bore_diameter"]:
-            issues.append("tool diameter exceeds bore diameter")
+            issues.append("tool diameter exceeds bore diameter"); ok = False
 
-    return ok, issues
+    # ── 4) suggestions
+    suggestions = suggest_corrections(step, machine, mat_tag, tool) if not ok else {}
+    return ok, issues, suggestions
+
 
 # ────────────────────────────────────────────────────────────────────────────
 # Reporting helpers
@@ -369,7 +389,7 @@ def summarize_validation(plan_txt: str, machine: Dict, material: str) -> str:
     tools = machine.get("tool_library", [])
     blocks = []
     for st in parse_txt_plan(plan_txt):
-        ok, issues = validate_step(st, machine, tag, tools)
+        ok, issues, _ = validate_step(st, machine, tag, tools)
         st["_calc"] = _calc_values(st, _find_tool(st.get("tool_id"), tools))
         blocks.append(summarize_step(st, ok, issues))
     return "\n\n".join(blocks)

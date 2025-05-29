@@ -87,15 +87,14 @@ def optimise_plan(
         # Gather issues + numeric fixes
         # ════════════════════════════════════════════════════════════════
         steps = av.parse_txt_plan(plan_txt)
-        issues, fixes = _collect_issues(steps, machine, tag, tools)
+        issues, fixes, tool_advise = _collect_issues(steps, machine, tag, tools)
 
         # Build LLM prompt ------------------------------------------------        
-        prompt = textwrap.dedent(f"""
+        prompt = textwrap.dedent(f"""\
         ## Below is the current process plan for the part imported as image with detected issues.
         **Please regenerate the entire process plan, keeping the same numbering, headings, and all the fields that are existing.**
         **Substitute only the corrected parameters (n, Vf, ap, ae) that are suggested.**
-
-                                
+                        
         ## Part description / user goal
         {description}
 
@@ -105,9 +104,13 @@ def optimise_plan(
         ## Detected issues
         {chr(10).join(issues)}
 
-        ## Suggested fixes
-        **Please substitute the detected wrong parameters in the process plan using the values inside the ranges expressed above**
+        ## Suggested process parameter fixes
+        ** Numeric parameters listed below are provided by reference, but it is *better* that you compute the parameters by yourself, using the formulas below. 
+        Do *not* re-introduce ranges; change only the specified fields (n, Vf, ap, ae).**
         {chr(10).join(fixes)}
+
+        ## Tooling advice
+        {chr(10).join(tool_advise) if tool_advise else '- None -'}
 
         ## Formula block
         {_FORMULA_BLOCK}
@@ -121,8 +124,8 @@ def optimise_plan(
 
 
         # DEBUG: print the prompt to LLM
-        print("\n--- DEBUG: PROMPT TO LLM ---\n")
-        print(prompt)
+        # print("\n--- DEBUG: PROMPT TO LLM ---\n")
+        # print(prompt)
 
 
         # Call LLM ---------------------------------------------------------
@@ -159,8 +162,10 @@ def _collect_issues(steps: List[Dict],
     Returns:
         - List of issue strings
         - List of suggested corrections
+        - List of tool advice (if any)
     """
-    issues_out, fix_out = [], []
+    issues_out, fix_out, tool_adv = [], [], []
+
     sugg_fn = getattr(av, "suggest_corrections", None)
 
     for st in steps:
@@ -177,12 +182,27 @@ def _collect_issues(steps: List[Dict],
 
         # 2) numeric overrides for the LLM
         if sug:
-            fix_out.append(
+            line = (
                 f"{st['step']} → tool_id={sug.get('tool_id', st.get('tool_id', '?'))} | "
-                f"n={sug['n']} | Vf={sug['vf']} | ap={sug['ap']} | ae={sug['ae']}"
+                f"n={sug['n']} | Vf={sug['vf']}"
+            )
+            if 'ap' in sug:       # milling cases
+                line += f" | ap={sug['ap']} | ae={sug['ae']}"
+            fix_out.append(line)
+
+
+        # 3) ask for a different tool when coating / LOC / Ø is invalid
+        warn_tool = [w for w in err if "tool coating" in w.lower()
+                                     or "exceeds tool loc" in w.lower()
+                                     or "tool diameter exceeds" in w.lower()]
+        if warn_tool:
+            tool_adv.append(
+                f"Step “{st['step']}”: current tool unsuitable; "
+                "use another tool available in the library, or keep the same tool in the process "
+                "but suggest a suitable tool with different diameter and/or coating *ONLY BELOW THE FINAL NOTES* section."
             )
 
-    return issues_out, fix_out
+    return issues_out, fix_out, tool_adv
 
 
 

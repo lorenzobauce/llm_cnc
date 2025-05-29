@@ -42,7 +42,7 @@ print("\n--- Geometry ---\n" + summary_text(geo) + "\n")
 user_prompt   = input("❓ Describe what you want to machine / ask CAM assistant: ")
 material_desc = input("❓ Material description: ")
 text_desc = (
-    "User prompt: " + user_prompt
+"User prompt: " + user_prompt
     + "\nMaterial description: " + material_desc
     + "\nGeometry description: " + summary_text(geo)
 )
@@ -56,7 +56,7 @@ machine_spec = json.loads(Path(machine_file).read_text())
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. Build RAG prompt & get initial plan
 # ─────────────────────────────────────────────────────────────────────────────
-ctx_chunks = get_relevant_context(text_desc, k=6)
+ctx_chunks = get_relevant_context(text_desc, k=7)
 rag_prompt = (
     build_process_prompt(text_desc, machine_spec)
     + "\n\n### Technical context (from CAM formulary)\n"
