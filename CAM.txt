@@ -1,7 +1,7 @@
-**Basic Equations**
+# Basic Equations
 
 ────────────────────────────────────────────────────────────────────────────
-*Milling*
+## Milling
 ────────────────────────────────────────────────────────────────────────────
 n                                            -> Spindle speed [rev/min]
 a_e                                          -> Radial depth of cut [mm]
@@ -17,20 +17,20 @@ v_f   = f_z · z · n                          -> Feed rate [mm/min]
 v_c   = π · D · n / 1000                     -> Cutting speed [m/min]
 f_z   = v_f / (n · z)                        -> Feed per tooth [mm/tooth]
 
-*Slab Milling (Peripherical)*
+### Slab Milling (Peripherical)
 h_θ = f_z · sin(θ)                           -> Chip thickness [mm]
 A_θ = h_θ · a_p                              -> Chip area [mm^2]
 h_av = f_z · sqrt(a_e/D)                     -> Average chip thickness when a_e/D ≤ 0.1 [mm]
 h_av = (f_z · a_e · sin(k_re) · 180) / (π · D · arcsin(a_e/D))  -> Average chip thickness when a_e/D > 0.1 [mm]
 A_av = (2 · f_z · a_e · a_p) / (φ · D)       -> Average chip area [mm^2]
 
-*Face Milling (Frontal)*
+### Face Milling (Frontal)
 h_θ = f_z · cos(θ) · sin(k_re)               -> Chip thickness [mm]
 A_θ = h_θ · a_p                              -> Chip area [mm^2]
 h_av = (2 · f_z · a_e · sin(k_re)) / (φ · D) -> Average chip thickness [mm] (to be used if z>2)
 A_av = (2 · f_z · a_e · a_p) / (φ · D)       -> Average chip area [mm^2]
 
-*Cutting Force and Power*
+### Cutting Force and Power
 k_{cs}= k_{c0,4} · 0.4^x                     -> Specific Cutting Pressure [MPa]
 k_c   = k_{cs} / h_D^{x}                     -> Cutting Pressure [MPa]
 F_c   = k_c · A_D                            -> Cutting Force [N]
@@ -42,14 +42,14 @@ T_c   = Σ_{i=1}^z (F_{c(θ_i)} · D / 2)       -> Cutting torque [Nm]
 P_c   = T_c · ω                              -> Cutting power [W]
 P_c   = v_c · F_c / 60                       -> Cutting power (alternative) [W]
 
-*Material Removal and Time*
+### Material Removal and Time
 MRR   = a_e · a_p · v_f                      -> Material Removal Rate [mm^3/min]
 t_c   = l_c / v_f = V / MRR                  -> Cutting time [min]
 t_m   = l_m / v_f                            -> Machining time [min]
 
 
 ────────────────────────────────────────────────────────────────────────────
-*Drilling (twist drill)*
+## Drilling (twist drill)
 ────────────────────────────────────────────────────────────────────────────
 D_c                                          -> Drill diameter [mm]
 k_re                                         -> Entering angle [rad]
@@ -64,7 +64,7 @@ MRR   = (π · D_c^2 · v_f) / 4                -> Material Removal Rate [mm^3/m
 t_c   = l_c / v_f = V / MRR                  -> Cutting Time [min]
 t_m   = l_m / v_f                            -> Machining Time [min]
 
-*Trepanning / Reaming / Counterboring*
+### Trepanning / Reaming / Counterboring
 A_D   = f_z · (D_{ext} - D_{int}) / 2        -> Chip Area [mm^2]
 F_c   = k_c · A_D                            -> Cutting Force [N]
 T_c   = Z · F_c · D_{ext}                    -> Cutting Torque [Nm]
@@ -75,7 +75,7 @@ t_m   = l_m / v_f                            -> Machining Time [min]
 
 
 ────────────────────────────────────────────────────────────────────────────
-*Tool life and Machining Economics*
+## Tool life and Machining Economics
 ────────────────────────────────────────────────────────────────────────────
 T                                            -> Tool life [min]
 v_c · T^(n) = C;                             -> Classical Taylor’s Law; n,C are parameters of the tool depending on tool material and sveral parameters
@@ -86,7 +86,7 @@ T_{opt} = (T_t + C_t / C_o) · (1/n - 1)      -> Production Cost – Optimal Too
 
 
 ────────────────────────────────────────────────────────────────────────────
-*Roughness*
+## Roughness
 ────────────────────────────────────────────────────────────────────────────
 R_{max} = f · 10^3 / (cotg(kr') + cotg(kr))  -> Maximum roughness for Turning – zero nose radius [μm]
 R_{max} = f^2 · 10^3 / (8 · r)               -> Maximum roughness for Turning – nose radius r [μm]
@@ -99,7 +99,7 @@ R_{max} = 2 · f / (z · (2π · R + 60 · Z · f) · 10^3) -> Slab Milling [μm
 
 
 ────────────────────────────────────────────────────────────────────────────
-*Cutting Parameters and Strategies Overview*
+# Cutting Parameters and Strategies Overview
 This guide offers a comprehensive reference for selecting cutting parameters and machining strategies, tailored to specific applications and ISO material classifications.
 
 ────────────────────────────────────────────────────────────────────────────
