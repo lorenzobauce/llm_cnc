@@ -65,6 +65,8 @@ _COATING_REQ = {
 def _strategy(text: str, op_line: str = "") -> str:
     """Infer machining strategy from free‑text description."""
     txt = f"{text} {op_line}".lower()
+    if any(k in txt for k in ("face", "facing", "face-milling", "facemill")):
+        return "facing"  
     if any(k in txt for k in ("rough", "roughing")):
         return "roughing"
     if any(
@@ -173,6 +175,14 @@ def _mid(lo: float, hi: float) -> float:
 def suggest_corrections(step: Dict, machine: Dict, mat_tag: str, tool: Dict) -> Dict:
     """Return a minimal set of parameter fixes to bring the step inside limits."""
     calc = _calc_values(step, tool)
+    strat = step["strategy"]
+    if strat == "facing":
+        ap_tgt = 2.0 if step.get("ap", 0) > 2.0 else step.get("ap", 0)
+        return {
+            "tool_id": step.get("tool_id"),
+            "ap": round(ap_tgt, 2)
+        }
+
     D, z = calc["D"], calc["z"]
     if not D:
         return {}
@@ -256,6 +266,16 @@ def validate_step(
     calc = _calc_values(step, tool)
     strat = step["strategy"]
 
+    # ── 0) special case for facing
+    if strat == "facing":
+        ok = True
+        issues = []
+        if step.get("ap", 0) > 2.0:
+            issues.append(f"ap {step['ap']} mm exceeds 2 mm limit for facing")
+            ok = False
+        suggestions = suggest_corrections(step, machine, mat_tag, tool) if not ok else {}
+        return ok, issues, suggestions
+    
     issues: List[str] = []
     ok = True
 
