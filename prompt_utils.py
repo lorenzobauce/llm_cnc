@@ -30,7 +30,7 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     tool_block = _fmt_tool_list(machine.get("tool_library", []))
 
     machine_block = textwrap.dedent(f"""
-    ### CNC Machine Specifications
+    # CNC Machine Specifications
     Name: {machine.get('name','')}
     Axes: {machine.get('axes','')}
     Max X axis stroke: {machine.get('max_X_axis_stroke','?')} mm
@@ -51,12 +51,12 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     Tool change type: {machine.get('tool_change_type','?')}
     Storage capacity {machine.get('tool_storage_capacity','?')} tools
 
-    #### Tool Library
+    ### Tool Library
     {tool_block}
     """).strip()
 
     manufacturability = textwrap.dedent("""
-    ### Manufacturability checks (MUST perform before outputting plan)
+    # Manufacturability checks (MUST perform before outputting plan)
     1. Envelope: Confirm the part bounding box fits within machine XYZ travel (include any rotary table tilt).
     2. Weight: Ensure workpiece weight ≤ machine limit.
     3. Tool reach: Compare pocket depth / wall height vs available LOC; suggest alternative tool if too short.
@@ -67,28 +67,24 @@ def build_process_prompt(description: str, machine: Dict) -> str:
     """).strip()
 
     prompt = textwrap.dedent(f"""
-    ### Part description / user goal
+    # Part description / user goal
     {description}
 
     {machine_block}
 
     {manufacturability}
     
-    ### Output requirements
+    # Output requirements
     Please format the output exactly as follows:
     
     ## Consideration
-    A short paragraph confirming manufacturability, followed by a bullet list summarizing part dimensions, machine limits, and tool reach.
-    
-    ## Process Plan
-    # Setup
-    - Material
-    - Fixture
+    A short paragraph confirming manufacturability, followed by a bullet list summarizing material, part dimensions, machine limits, and fixture.
 
-    # Operations
-    If multiple operations are required, number them sequentially (1, 2, 3, ...).
+    ## Operations
+    List all required CNC operations to manufacture the part from a solid block of the specified material and number them sequentially (1, 2, 3, ...).
     Take into account providing both roughing and finishing operations if applicable or required.
-    Each operation must be *EXACTLY* in the following format with all fields filled and with numerical values where applicable:
+    Each operation must be **EXACTLY** in the following format example twith all fields filled and with numerical values where applicable:
+
     1. **Step name**
         - **Tool**: Endmill D=16 mm (Tool ID: 9)
         - **Strategy**: Trochoidal (Slot) Milling
@@ -99,12 +95,10 @@ def build_process_prompt(description: str, machine: Dict) -> str:
         - **Coolant**: On
         - **Notes**: (Optional)
 
-    # Notes
+    ## Notes
     List 2–3 notes regarding collision, tolerances, or simulation.
 
-    Use Markdown formatting. Numbers and equations should be in plain text (e.g., n = 1000 * Vc / (pi * D)). Only respond with the plan in this format.
+    Use Markdown formatting.
     """)
 
     return prompt.strip()
-
-    # Use Markdown formatting and LaTeX for any equations (e.g. `n = \\frac{{1000 \\cdot V_c}}{{\\pi \\cdot D}}`).

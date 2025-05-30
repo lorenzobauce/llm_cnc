@@ -46,11 +46,11 @@
     {"id": 22, "type": "roughing", "dia": 25, "flutes": 5, "coating": "TiAlN", "loc": 52},
     {"id": 23, "type": "roughing", "dia": 32, "flutes": 6, "coating": "TiAIN", "loc": 52},
     {"id": 24, "type": "drill", "dia": 2.5, "flutes": 2, "coating": "TiAlN", "loc": 8},
-    {"id": 25, "type": "drill", "dia": 5, "flutes": 2, "coating": "TiAlN", "loc": 15},
-    {"id": 26, "type": "drill", "dia": 6, "flutes": 2, "coating": "TiAlN", "loc": 18},
-    {"id": 27, "type": "drill", "dia": 8, "flutes": 2, "coating": "TiAlN", "loc": 20},
-    {"id": 28, "type": "drill", "dia": 10, "flutes": 2, "coating": "TiAlN", "loc": 24},
-    {"id": 29, "type": "endmill", "dia": 8, "flutes": 3, "coating": "uncoated", "loc": 25},
-    {"id": 30, "type": "endmill", "dia": 10, "flutes": 4, "coating": "uncoated", "loc": 30}
+    {"id": 25, "type": "drill", "dia": 4, "flutes": 2, "coating": "TiAlN", "loc": 17},
+    {"id": 26, "type": "drill", "dia": 6, "flutes": 2, "coating": "TiAlN", "loc": 24},
+    {"id": 27, "type": "drill", "dia": 8, "flutes": 2, "coating": "TiAlN", "loc": 35},
+    {"id": 28, "type": "drill", "dia": 10, "flutes": 2, "coating": "TiAlN", "loc": 96},
+    {"id": 29, "type": "drill", "dia": 5, "flutes": 3, "coating": "Hyb. AlCrN", "loc": 35},
+    {"id": 30, "type": "drill", "dia": 9, "flutes": 2, "coating": "Hyb. AlCrN", "loc": 49}
     ]
 }

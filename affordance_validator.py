@@ -265,7 +265,7 @@ def validate_step(
     if step.get("vf", 0) > machine.get("max_feed_rate", 9e9):
         issues.append("feed > machine limit"); ok = False
 
-    # ── 2) Length-of-cut check
+    # Length-of-cut check
     # Make sure 'tool' is defined for the current step
     tool_id = step.get("tool_id")
     tool = next((t for t in tools if t.get("id") == tool_id), {})
@@ -274,7 +274,7 @@ def validate_step(
     if strat not in ("drilling") and step.get("ap", 0) > loc_mm:
         issues.append("ap exceeds tool LOC"); ok=False
 
-    # ── 3) material + geometry limits (Vc, fz / fn, engagements …)
+    # ── 2) material + geometry limits (Vc, fz / fn, engagements …)
     lim = cam.get_limits_for(
         mat_tag,
         operation="drilling" if strat == "drilling" else "milling",
@@ -330,7 +330,7 @@ def validate_step(
             if _out_of_band(aeR, *eng["ae_d"]):
                 issues.append(f"ae/D {aeR:.2f} outside [{eng['ae_d'][0]:.2f},{eng['ae_d'][1]:.2f}]"); ok = False
 
-    # coating vs material class (unchanged)
+    # coating vs material class
     coating = tool.get("coating", "").lower()
     reqs = _COATING_REQ.get(mat_tag, [])
     if mat_tag == "N":
@@ -345,7 +345,7 @@ def validate_step(
         if calc["D"] > step["bore_diameter"]:
             issues.append("tool diameter exceeds bore diameter"); ok = False
 
-    # ── 4) suggestions
+    # ── 3) suggestions
     suggestions = suggest_corrections(step, machine, mat_tag, tool) if not ok else {}
     return ok, issues, suggestions
 

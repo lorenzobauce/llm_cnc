@@ -56,14 +56,14 @@ machine_spec = json.loads(Path(machine_file).read_text())
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. Build RAG prompt & get initial plan
 # ─────────────────────────────────────────────────────────────────────────────
-ctx_chunks = get_relevant_context(text_desc, k=7)
+ctx_chunks = get_relevant_context(text_desc, k=6)
 rag_prompt = (
     build_process_prompt(text_desc, machine_spec)
     + "\n\n### Technical context (from CAM formulary)\n"
     + "\n\n".join(ctx_chunks)
 )
 
-print("\nCalling GPT-4o-mini for initial plan …")
+print("\nCalling GPT-4o for initial plan …")
 with Progress(SpinnerColumn(), TextColumn("Generating…")) as bar:
     t = bar.add_task("llm"); bar.start_task(t)
     init_plan = call_llm_with_system(rag_prompt,
@@ -112,4 +112,9 @@ if save:
 else:
     print("\n\n⚠️ [Skipped] File was not saved.")
 
+# ─────────────────────────────────────────────────────────────────────────────
+from export_utils import export_plan
+export_plan(final_plan)
+
+# ─────────────────────────────────────────────────────────────────────────────
 shutil.rmtree(tmp_dir)

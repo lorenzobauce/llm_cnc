@@ -1,5 +1,5 @@
 pip install dotenv openai tiktoken pydantic python-dotenv
-pip install pandas numpy matplotlib tabulate ipywidgets rich inquirer 
+pip install pandas numpy matplotlib tabulate ipywidgets rich inquirer markdown
 pip install langchain langchain_community langchain_openai
 pip install faiss-cpu faiss-gpu 
 

@@ -91,7 +91,7 @@ def optimise_plan(
 
         # Build LLM prompt ------------------------------------------------        
         prompt = textwrap.dedent(f"""\
-        ## Below is the current process plan for the part imported as image with detected issues.
+        # Below is the current process plan for the part imported as image with detected issues.
         **Please regenerate the entire process plan, keeping the same numbering, headings, and all the fields that are existing.**
         **Substitute only the corrected parameters (n, Vf, ap, ae) that are suggested.**
                         
@@ -105,17 +105,16 @@ def optimise_plan(
         {chr(10).join(issues)}
 
         ## Suggested process parameter fixes
-        ** Numeric parameters listed below are provided by reference, but it is *better* that you compute the parameters by yourself, using the formulas below. 
-        Do *not* re-introduce ranges; change only the specified fields (n, Vf, ap, ae).**
+        Numeric parameters listed below are provided by reference, but it is **better** that you compute the parameters by yourself, using the formulas below. 
+        Do **not** re-introduce ranges; change only the specified fields (n, Vf, ap, ae).
         {chr(10).join(fixes)}
 
         ## Tooling advice
+        If the tool is not suitable use another one available in the library, or keep the same tool in the process if the correct one is not available.
+        For these cases suggest a suitable tool with different diameter and/or coating **ONLY BELOW THE FINAL NOTES** section.
         {chr(10).join(tool_advise) if tool_advise else '- None -'}
 
-        ## Formula block
-        {_FORMULA_BLOCK}
-
-        ## Contextual information
+        ## Technical context (from CAM formulary)
         {context_block}
 
         ### CNC Machine Specifications
@@ -124,15 +123,16 @@ def optimise_plan(
 
 
         # DEBUG: print the prompt to LLM
-        # print("\n--- DEBUG: PROMPT TO LLM ---\n")
-        # print(prompt)
+        print("\n--- DEBUG: PROMPT TO LLM ---\n")
+        print(prompt)
 
 
         # Call LLM ---------------------------------------------------------
         with Progress(SpinnerColumn(), TextColumn("Regenerating…")) as bar:
             t = bar.add_task("llm"); bar.start_task(t)
             if image_url:
-                plan_txt = call_llm_with_system(prompt, image_url,
+                plan_txt = call_llm_with_system(prompt, 
+                                                image_url,
                                                 system_message="You are an expert mechanical CAM engineer assisting the user developing the complete manufacturing process.",
                                                 model=MODEL)
             else:
@@ -198,8 +198,6 @@ def _collect_issues(steps: List[Dict],
         if warn_tool:
             tool_adv.append(
                 f"Step “{st['step']}”: current tool unsuitable; "
-                "use another tool available in the library, or keep the same tool in the process "
-                "but suggest a suitable tool with different diameter and/or coating *ONLY BELOW THE FINAL NOTES* section."
             )
 
     return issues_out, fix_out, tool_adv

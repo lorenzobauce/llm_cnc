@@ -43,10 +43,10 @@ def _rng(s: str) -> Tuple[float, float]:
 _VC: Dict[str, Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 1a. Cutting Speed"):
+    if ln.startswith("# 1a."):
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 1a"):
+    if sec and ln.startswith("# ") and not ln.startswith("# 1a."):
         break
     if sec and "|" in ln and ln.strip()[0] in "PMKNSH":
         iso = ln.strip()[0]
@@ -59,12 +59,12 @@ for ln in _lines:
 _VC_DRILL: Dict[str, Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 1b. Drilling"):
+    if ln.startswith("# 1b."):
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 1b"):
+    if sec and ln.startswith("# ") and not ln.startswith("# 1b."):
         break          # uscita a fine blocco
-    if sec and "->" in ln and ln.strip()[0] in "PMKNSH":     # include anche N,S
+    if sec and "->" in ln and ln.strip()[0] in "PMKNSH":     
         iso = ln.strip()[0]
         _VC_DRILL[iso] = _rng(ln)
 
@@ -76,10 +76,10 @@ _FZ_ROUGH: Dict[str, Tuple[float, float]] = {}
 _FZ_FINISH: Dict[str, Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 2a. Feed per Tooth"):
+    if ln.startswith("# 2a."):
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 2a"):
+    if sec and ln.startswith("# ") and not ln.startswith("# 2a."):
         break
     if sec and "|" in ln and ln.strip()[0] in "PMKNSH":
         iso = ln.strip()[0]
@@ -95,13 +95,13 @@ for ln in _lines:
 _FN_DRILL: Dict[Tuple[str, str], Tuple[float, float]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 2b."):          # start of pipe-table block
+    if ln.startswith("# 2b."):          
         sec = True
         continue
     if sec and ln.startswith("# ") and not ln.startswith("# 2b."):
-        break                            # next rubric → end-of-block
+        break                            
 
-    if not sec or "│" in ln:             # skip pretty-printing lines
+    if not sec or "│" in ln:             
         continue
 
     if "|" in ln and ln.count("|") >= 2:
@@ -121,10 +121,10 @@ for ln in _lines:
 _ENG: Dict[str, Dict[str, Tuple[float, float]]] = {}
 sec = False
 for ln in _lines:
-    if ln.startswith("# 3. Depths of Cut"):
+    if ln.startswith("# 3."):
         sec = True
         continue
-    if sec and ln.startswith("# ") and not ln.startswith("# 3"):
+    if sec and ln.startswith("# ") and not ln.startswith("# 3."):
         break
     if sec and "|" in ln and any(k in ln for k in ("Finishing", "Roughing", "Slotting")):
         cols = [c.strip() for c in ln.split("|")]
@@ -136,21 +136,21 @@ for k in ("roughing", "finishing", "slotting"):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4 . Cutting‑pressure constants kc0_4 + exponent x (§9)
+# 4 . Cutting‑pressure constants kc0_4 + exponent x (§10)
 # ─────────────────────────────────────────────────────────────────────────────
 _KC: Dict[str, Tuple[float, float]] = {}
 _X: Dict[str, Tuple[float, float]] = {}
 sec_kc = sec_x = False
 for ln in _lines:
-    if ln.startswith("# 9. Typical values"):
+    if ln.startswith("# 10."):
         sec_kc = True
         continue
     if sec_kc and "Typical exponent" in ln:
         sec_x = True
         continue
-    if sec_kc and ln.startswith("# ") and not ln.startswith("# 9"):
+    if sec_kc and ln.startswith("# ") and not ln.startswith("# 10."):
         sec_kc = False
-    if sec_x and ln.startswith("# ") and not ln.startswith("# 9"):
+    if sec_x and ln.startswith("# ") and not ln.startswith("# 10."):
         sec_x = False
     if sec_kc and "->" in ln and ln.strip()[0] in "PMKNSH":
         iso = ln.strip()[0]
