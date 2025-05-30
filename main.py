@@ -24,7 +24,12 @@ def _choose_file(msg: str, folder: str, exts: tuple[str, ...]) -> str:
 def ask_save_location() -> str | None:
     root = Tk(); root.withdraw()
     return filedialog.asksaveasfilename(defaultextension=".txt",
-                                        filetypes=[("Text files","*.txt")])
+                                        filetypes=[
+                                            ("Text files","*.txt"),
+                                            ("Markdown files","*.md"),
+                                            ("All files","*.*")
+                                        ],
+    )
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Pick drawing & encode
@@ -112,9 +117,4 @@ if save:
 else:
     print("\n\n⚠️ [Skipped] File was not saved.")
 
-# ─────────────────────────────────────────────────────────────────────────────
-from export_utils import export_plan
-export_plan(final_plan)
-
-# ─────────────────────────────────────────────────────────────────────────────
 shutil.rmtree(tmp_dir)

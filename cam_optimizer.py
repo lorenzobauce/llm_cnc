@@ -123,8 +123,8 @@ def optimise_plan(
 
 
         # DEBUG: print the prompt to LLM
-        print("\n--- DEBUG: PROMPT TO LLM ---\n")
-        print(prompt)
+        # print("\n--- DEBUG: PROMPT TO LLM ---\n")
+        # print(prompt)
 
 
         # Call LLM ---------------------------------------------------------
