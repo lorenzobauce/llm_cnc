@@ -95,6 +95,8 @@ def build_process_prompt(description: str, machine: Dict) -> str:
         - **Coolant**: On
         - **Notes**: (Optional)
 
+    Be sure to write field with : outside the bolded text please.
+
     ## Notes
     List 2–3 notes regarding collision, tolerances, or simulation.
 

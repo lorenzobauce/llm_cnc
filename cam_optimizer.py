@@ -36,10 +36,7 @@ def optimise_plan(
                   image_url: str | None = None,
                   context_block: str = "") -> str:
 
-    """
-    Infinite refinement loop until the operator exits.
-    Returns the *final* plan string that satisfied the user.
-    """
+
     plan_txt = _read(plan_path)
     machine = json.loads(_read(machine_path))    
     tools    = machine.get("tool_library", [])

@@ -5,12 +5,6 @@ This module parses a free‑form machining process plan, validates every step
 against material / tool tables coming from *parse_cam_formulary.py*, and
 (optionally) suggests corrected cutting parameters that keep the same tool but
 stay inside the safe operating window of machine + material + tool geometry.
-
-Important behavioural rule requested by the user (2024‑05‑28):
-    • **Drilling**   → check / report only feed *per revolution* **fₙ**
-    • **Milling**    → check / report only feed *per tooth*       **f_z**
-
-Comments are in English for clarity.
 """
 from __future__ import annotations
 
@@ -65,7 +59,14 @@ _COATING_REQ = {
 def _strategy(text: str, op_line: str = "") -> str:
     """Infer machining strategy from free‑text description."""
     txt = f"{text} {op_line}".lower()
-    if any(k in txt for k in ("face", "facing", "face-milling", "facemill")):
+    if any(k in txt for k in (
+        "face", 
+        "facing", 
+        "face-milling", 
+        "facemill",
+        "stock"
+        )
+    ):
         return "facing"  
     if any(k in txt for k in ("rough", "roughing")):
         return "roughing"
@@ -85,7 +86,17 @@ def _strategy(text: str, op_line: str = "") -> str:
         )
     ):
         return "finishing"
-    if any(k in txt for k in ("drill", "drilling", "bore", "boring", "ream", "reaming", "tapping", "tap")):
+    if any(k in txt for k in (
+        "drill", 
+        "drilling", 
+        "bore", 
+        "boring", 
+        "ream", 
+        "reaming", 
+        "tapping", 
+        "tap"
+        )
+    ):
         return "drilling"
     if any(
         k in txt
