@@ -1,0 +1,57 @@
+Adjust spindle speed
+Adjust feed rate
+Adjust Depth/Pass
+Adjust Side Engagement
+Turn off coolant
+Turn on coolant
+Begin setting up Facing stage
+Begin setting up Face Milling stage
+Begin setting up Bore Drilling stage
+Begin setting up Gear Teeth Roughing stage
+Begin setting up Gear Teeth Finishing stage
+Begin setting up External Profiling stage
+Begin setting up Rough Outer Diameter stage
+Begin setting up Profile Finish stage
+Begin setting up Cut Internal Bore stage
+Begin setting up Mill Teeth stage
+Select strategy Face Milling
+Select strategy Peck Drilling
+Select strategy Trochoidal Milling
+Select strategy Adaptive Clearing
+Select strategy Milling
+Select strategy Contour Milling
+Select strategy Drilling
+Select strategy 3D Swarf Milling
+Select Tool Endmill with Tool ID: 1
+Select Tool Endmill with Tool ID: 2
+Select Tool Endmill with Tool ID: 3
+Select Tool Endmill with Tool ID: 4
+Select Tool Endmill with Tool ID: 5
+Select Tool Endmill with Tool ID: 6
+Select Tool Endmill with Tool ID: 7
+Select Tool Endmill with Tool ID: 8
+Select Tool Endmill with Tool ID: 9
+Select Tool Endmill with Tool ID: 10
+Select Tool Endmill with Tool ID: 11
+Select Tool Endmill with Tool ID: 12
+Select Tool Ballmill with Tool ID: 13
+Select Tool Ballmill with Tool ID: 14
+Select Tool Ballmill with Tool ID: 15
+Select Tool Ballmill with Tool ID: 16
+Select Tool Ballmill with Tool ID: 17
+Select Tool Ballmill with Tool ID: 18
+Select Tool Ballmill with Tool ID: 19
+Select Tool Ballmill with Tool ID: 20
+Select Tool Roughing with Tool ID: 21
+Select Tool Roughing with Tool ID: 22
+Select Tool Roughing with Tool ID: 23
+Select Tool Roughing with Tool ID: 24
+Select Tool Roughing with Tool ID: 25
+Select Tool Drill with Tool ID: 26
+Select Tool Drill with Tool ID: 27
+Select Tool Drill with Tool ID: 28
+Select Tool Drill with Tool ID: 29
+Select Tool Drill with Tool ID: 30
+All settings done, start the CNC machine
+Wait for the CNC machine to finish
+Stop the CNC machine
